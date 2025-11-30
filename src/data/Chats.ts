@@ -1,0 +1,37 @@
+export const chats = [
+  {
+    id: 1,
+    src: "/tapo-call-image.png",
+    name: "Bose",
+    time: "12:00PM",
+    message: "How are you this short?",
+    messageCount: 2,
+    alt: "call",
+  },
+  {
+    id: 2,
+    src: "/tapo-text-image.png",
+    name: "Oyin",
+    time: "12:00PM",
+    message: "How are you still sleeping?",
+    messageCount: 2,
+    alt: "call",
+  },
+  {
+    id: 3,
+    src: "/tapo-call-image.png",
+    name: "Adeyemi",
+    time: "12:00PM",
+    message: "How are you today?",
+    alt: "call",
+  },
+  {
+    id: 4,
+    src: "/tapo-text-image.png",
+    name: "Ade",
+    time: "12:00PM",
+    message: "How are you Tee?",
+    messageCount: 4,
+    alt: "call",
+  },
+];
