@@ -75,7 +75,7 @@
 
 @layer utilities {
   .input-custom {
-    @apply px-4 py-2 focus:ring-1 outline-none border border-double border-blue-500 focus:shadow-blue-300;
+    @apply px-4 py-2 focus:ring-1 outline-none border border-double border-blue-500 focus:shadow-blue-300 rounded-lg;
   }
 
   .label-custom {

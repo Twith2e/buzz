@@ -14,6 +14,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+let fcmInitDone = false;
+
 export default function Providers({ children }) {
   const queryClient = new QueryClient();
   function SocketWithUser({ children }) {
@@ -21,13 +23,17 @@ export default function Providers({ children }) {
 
     useEffect(() => {
       if (!user?._id) return;
+      if (fcmInitDone) return;
+      fcmInitDone = true;
       const jwt = localStorage.getItem("tapo_accessToken") || "";
       const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker
           .register("/firebase-messaging-sw.js")
-          .catch((err) => console.warn("Service worker registration failed:", err));
+          .catch((err) =>
+            console.warn("Service worker registration failed:", err)
+          );
       }
 
       registerForFCM(firebaseConfig, {

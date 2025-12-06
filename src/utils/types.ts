@@ -123,9 +123,54 @@ export type ChatMessage = {
   ts: string;
   status?: string;
   taggedMessage?: TaggedMessage | { _id?: string; message: string; from: any };
+  attachments?: Array<{
+    format: string;
+    url: string;
+    name?: string;
+    size?: number;
+    duration?: number;
+    filename?: string;
+    height?: number;
+    width?: number;
+  }>;
 };
 
 export type MessageResponse = {
   status: boolean;
   messages: Message[];
+};
+
+export type CloudinaryUploadResponse = {
+  asset_id: string;
+  public_id: string;
+  version: number;
+  version_id: string;
+  signature: string;
+  width: number;
+  height: number;
+  format: string;
+  resource_type: string;
+  created_at: string;
+  tags: [];
+  bytes: number;
+  type: string;
+  etag: string;
+  placeholder: boolean;
+  url: string;
+  secure_url: string;
+  asset_folder: string;
+  display_name: string;
+  original_filename: string;
+  eager: [
+    {
+      transformation: string;
+      width: number;
+      height: number;
+      bytes: number;
+      format: string;
+      url: string;
+      secure_url: string;
+    }
+  ];
+  api_key: string;
 };

@@ -35,13 +35,15 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row px-3">
       <div className="hidden md:flex w-1/2 bg-[#33BEE7] justify-center items-center">
-        <h1 className="font-bold text-4xl text-white font-rubik">JOIN US</h1>
+        <h1 className="font-bold text-xl lg:text-4xl text-white font-rubik">
+          JOIN US
+        </h1>
       </div>
-      <div className="md:w-1/2 flex flex-col justify-center items-center">
+      <div className="md:w-1/2 flex flex-col lg:justify-center lg:items-center py-6">
         <div className="w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800 font-rubik">
+          <h2 className="text-xl lg:text-2xl font-bold mb-6 text-gray-800 font-rubik">
             EMAIL INPUT
           </h2>
           <form
@@ -65,7 +67,7 @@ export default function AuthPage() {
             </div>
             <button
               disabled={isLoading}
-              className="bg-[#33BEE7] text-white py-2 px-3 font-sans mt-4 disabled:bg-blue-200 disabled:cursor-not-allowed w-full justify-center flex"
+              className="bg-[#33BEE7] text-white py-2 px-3 font-sans mt-4 disabled:bg-blue-200 disabled:cursor-not-allowed w-full justify-center flex rounded-lg cursor-pointer hover:opacity-90 text-sm lg:text-base"
             >
               {isLoading ? (
                 <div className="h-6 w-6 rounded-full border-2 border-t-blue-600 border-blue-300 animate-spin"></div>

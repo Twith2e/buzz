@@ -130,3 +130,16 @@ export const alphabets = [
     contacts: [],
   },
 ];
+
+export const MEDIA_ACCEPT = "image/*,video/*";
+export const DOC_ACCEPT = [
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".ppt",
+  ".pptx",
+  ".xls",
+  ".xlsx",
+  ".csv",
+  ".txt",
+].join(", ");

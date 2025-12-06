@@ -72,12 +72,12 @@ export default function OtpPage() {
       <div className="hidden md:flex w-1/2 bg-[#33BEE7] justify-center items-center">
         <h1 className="font-bold text-4xl text-white font-rubik">JOIN US</h1>
       </div>
-      <div className="md:w-1/2 flex flex-col justify-center items-center">
+      <div className="md:w-1/2 flex flex-col justify-center items-center py-6 lg:py-0">
         <div className="w-full max-w-md flex flex-col justify-center items-center">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800 font-rubik">
+          <h2 className="text-xl lg:text-2xl font-bold mb-6 text-gray-800 font-rubik">
             ENTER VERIFICATION CODE
           </h2>
-          <p className="text-center">
+          <p className="text-center text-xs mb-3">
             Kindly input the 6-digit OTP has been sent to <br />
             <span className="text-gray-500">{email && email}</span>
           </p>
@@ -106,7 +106,7 @@ export default function OtpPage() {
             )}
           />
           <div className="mt-5 relative">
-            <p className="font-sans font-bold text-sm">
+            <p className="font-sans font-bold text-xs lg:text-sm">
               Didn't receive the OTP?{" "}
               <span>
                 <button

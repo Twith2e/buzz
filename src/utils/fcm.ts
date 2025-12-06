@@ -71,26 +71,22 @@ export async function registerForFCM(
     const messaging: Messaging = getMessaging();
 
     // Get FCM token. Note: throws on failure.
-    const currentToken = await getToken(messaging, { vapidKey });
+    const swReg = await navigator.serviceWorker.getRegistration();
+    const currentToken = await getToken(messaging, { vapidKey, serviceWorkerRegistration: swReg || undefined });
     if (!currentToken) {
       console.warn("FCM: getToken returned no token");
       return null;
     }
 
     // Send token to backend to save it
-    const resp = await api.post("/push/subscribe", {
-      token: currentToken,
-      platform,
-    });
+    const resp = await api.post(
+      "/push/subscribe",
+      { token: currentToken, platform },
+      { headers: { Authorization: `Bearer ${jwt}` } }
+    );
 
     if (resp.status !== 200) {
-      // backend rejected token storage — log and still return token (or null if you prefer)
-      console.error(
-        "Failed to save FCM token on server:",
-        resp.status,
-        await resp.data.text()
-      );
-      // still return token; caller may retry server registration or handle error
+      console.error("Failed to save FCM token on server:", resp.status, resp.data);
       return currentToken;
     }
 

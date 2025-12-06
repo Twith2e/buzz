@@ -37,6 +37,26 @@ type ConversationContextType = {
   setConversations: Dispatch<SetStateAction<Conversation[] | null>>;
   selectedMessageId: string | null;
   setSelectedMessageId: Dispatch<SetStateAction<string | null>>;
+  selectedImage: {
+    images: Array<File> | null;
+    currentIndex: number | null;
+  };
+  setSelectedImage: Dispatch<
+    SetStateAction<{
+      images: Array<File> | null;
+      currentIndex: number | null;
+    }>
+  >;
+  selectedDoc: {
+    docs: Array<File> | null;
+    currentIndex: number | null;
+  };
+  setSelectedDoc: Dispatch<
+    SetStateAction<{
+      docs: Array<File> | null;
+      currentIndex: number | null;
+    }>
+  >;
 };
 
 const ConversationContext = createContext<ConversationContextType>({
@@ -57,6 +77,16 @@ const ConversationContext = createContext<ConversationContextType>({
   setConversations: () => {},
   selectedMessageId: null,
   setSelectedMessageId: () => {},
+  selectedImage: {
+    images: null,
+    currentIndex: 0,
+  },
+  setSelectedImage: () => {},
+  selectedDoc: {
+    docs: null,
+    currentIndex: null,
+  },
+  setSelectedDoc: () => {},
 });
 
 export default function ConversationContextProvider({
@@ -71,6 +101,21 @@ export default function ConversationContextProvider({
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
     null
   );
+  const [selectedImage, setSelectedImage] = useState<{
+    images: Array<File> | null;
+    currentIndex: number | null;
+  }>({
+    images: null,
+    currentIndex: null,
+  });
+
+  const [selectedDoc, setSelectedDoc] = useState<{
+    docs: Array<File> | null;
+    currentIndex: number | null;
+  }>({
+    docs: null,
+    currentIndex: null,
+  });
 
   useEffect(() => {
     if (fetchedConversations) {
@@ -189,6 +234,10 @@ export default function ConversationContextProvider({
         setConversations,
         selectedMessageId,
         setSelectedMessageId,
+        selectedImage,
+        setSelectedImage,
+        selectedDoc,
+        setSelectedDoc,
       }}
     >
       {children}

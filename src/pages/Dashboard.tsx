@@ -5,9 +5,13 @@ import Chats from "../components/Chats";
 import { HiOutlineMenu } from "react-icons/hi";
 import { useState } from "react";
 import ChatUI from "../components/ChatUI";
+import { useUserContext } from "@/contexts/UserContext";
+import { useConversationContext } from "@/contexts/ConversationContext";
 
 export default function Dashboard() {
   const [expanded, setExpanded] = useState(false);
+  const { chatAreaRef, setIsAreaClicked } = useUserContext();
+  const { setSelectedImage } = useConversationContext();
 
   return (
     <div className="flex h-screen">
@@ -70,7 +74,16 @@ export default function Dashboard() {
           ))}
         </div>
       </aside>
-      <PanelGroup className="grow" autoSaveId="example" direction="horizontal">
+      <PanelGroup
+        className="grow"
+        autoSaveId="example"
+        direction="horizontal"
+        ref={chatAreaRef}
+        onClick={() => {
+          setSelectedImage({ images: null, currentIndex: null });
+          setIsAreaClicked(true);
+        }}
+      >
         <Panel maxSize={60} minSize={25}>
           <Chats />
         </Panel>

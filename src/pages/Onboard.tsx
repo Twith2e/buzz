@@ -48,9 +48,9 @@ export default function Onboard() {
           ALMOST DONE
         </h1>
       </div>
-      <div className="md:w-1/2 flex flex-col justify-center items-center">
+      <div className="md:w-1/2 flex flex-col justify-center items-center py-6 lg:py-0 px-3 lg:px-0">
         <div className="w-full max-w-md flex flex-col justify-center items-center">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800 font-rubik">
+          <h2 className="text-xl lg:text-2xl font-bold mb-6 text-gray-800 font-rubik">
             COMPLETE YOUR PROFILE
           </h2>
           <form
@@ -59,10 +59,10 @@ export default function Onboard() {
           >
             <label htmlFor="">Profile Picture</label>
             <label
-              className="border border-gray-400 rounded-full h-60 w-60 flex items-center justify-center"
+              className="border border-gray-400 rounded-full h-40 w-40 flex items-center justify-center"
               htmlFor="profile-picture"
             >
-              <BiSolidImageAdd size={70} />
+              <BiSolidImageAdd size={50} />
             </label>
             <input
               className="hidden"

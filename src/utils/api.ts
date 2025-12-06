@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://tapo-server.onrender.com/api/v1",
+  baseURL: "http://localhost:3001/api/v1",
   withCredentials: true,
 });
 

@@ -2,35 +2,25 @@ import { LuSendHorizontal } from "react-icons/lu";
 import { IoMdCall } from "react-icons/io";
 import { HiOutlineVideoCamera } from "react-icons/hi2";
 import { useSocketContext } from "../contexts/SocketContext";
-import { FormEvent, useRef, useState } from "react";
+import { useState, useRef } from "react";
 import { useEffect } from "react";
 import { useConversationContext } from "../contexts/ConversationContext";
 import { useUserContext } from "@/contexts/UserContext";
 import Message from "./Message";
 import MessageMenu from "./MessageMenu";
-import { formatTime, makeClientId } from "@/lib/utils";
+import { formatAttachments, formatTime } from "@/lib/utils";
 import type { ChatMessage } from "@/utils/types";
 import useReadObserver from "@/hooks/useReadObserver";
 import { useGetConversations } from "@/services/conversation/conversation";
-import { LucideX } from "lucide-react";
+import { LucideSmile, LucideX } from "lucide-react";
+import EmojiPicker from "emoji-picker-react";
+// import { Theme, EmojiStyle } from "emoji-picker-react";
+import FileModal from "./FileModal";
+import SelectedFilePreview from "./SelectedFilePreview";
+import { useSendMessage } from "@/hooks/useSendMessage";
 
 export default function ChatUI() {
-  const messagesRef = useRef<HTMLDivElement | null>(null);
-  const { user, contactList } = useUserContext();
-  const { emit, on, connected } = useSocketContext();
-  const {
-    email,
-    contact,
-    roomId,
-    initialized,
-    setSentMessages,
-    sentMessages,
-    setUsersOnline,
-    usersOnline,
-    conversationTitle,
-    selectedMessageId,
-    setSelectedMessageId,
-  } = useConversationContext();
+  const [openShare, setOpenShare] = useState(false);
   const [message, setMessage] = useState<string>("");
   const [menu, setMenu] = useState<{
     open: boolean;
@@ -48,11 +38,48 @@ export default function ChatUI() {
     message: string;
     from: any;
   } | null>(null);
+  const { user, contactList, isAreaClicked, setIsAreaClicked } =
+    useUserContext();
+  const { emit, on, connected } = useSocketContext();
+  const {
+    email,
+    contact,
+    roomId,
+    initialized,
+    setSentMessages,
+    sentMessages,
+    setUsersOnline,
+    usersOnline,
+    conversationTitle,
+    selectedMessageId,
+    setSelectedMessageId,
+    selectedImage,
+    selectedDoc,
+  } = useConversationContext();
   const { containerRef, registerMessageRef } = useReadObserver({
     emit,
     roomId,
     userId: user?._id,
   });
+  const emojiRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight || 0,
+        behavior: "smooth",
+      });
+    }
+  }, [roomId]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight || 0,
+        behavior: "smooth",
+      });
+    }
+  }, [sentMessages?.length]);
   const { data: conversations } = useGetConversations();
   const currentConvo = conversations?.find(
     (c: any) => c._id === roomId || c.roomId === roomId
@@ -77,176 +104,84 @@ export default function ChatUI() {
       )
     : selectedTag;
 
-  function addOptimisticMessage(
-    setSentMessages: (val: any) => void,
-    { tempId, roomId, user, message }
-  ) {
-    let tagged: any = null;
-    if (selectedMessageId) {
-      console.log(sentMessages);
-
-      const found = (sentMessages || []).find(
-        (m: any) => (m._id || m.id) === selectedMessageId
-      );
-      if (found) {
-        console.log("found");
-
-        tagged = {
-          _id: found._id || found.id,
-          message: found.message,
-          from:
-            typeof found.from === "string" ? { _id: found.from } : found.from,
-        };
-      }
-    }
-    if (!tagged && selectedTag) {
-      tagged = selectedTag;
-    }
-
-    const optimistic: ChatMessage = {
-      id: tempId,
-      tempId,
-      conversationId: roomId,
-      from: { _id: user?._id },
-      message,
-      ts: new Date().toISOString(),
-      status: "sending",
-      taggedMessage: tagged || undefined,
-    };
-
-    setSentMessages((prev: any) => {
-      const base = Array.isArray(prev) ? (prev as ChatMessage[]) : [];
-      return [...base, optimistic];
-    });
+  function enrichTaggedMessage(tm: any): any {
+    if (!tm) return tm;
+    const id = (tm as any)?._id || (tm as any)?.id;
+    if (!id) return tm;
+    const found = (sentMessages || []).find((m: any) => (m._id || m.id) === id);
+    if (!found) return tm;
+    const att = formatAttachments(
+      (found as any).attachment || (found as any).attachments
+    );
+    if (!att || att.length === 0) return tm;
+    return { ...tm, attachments: att, attachment: att };
   }
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!message) return;
-    if (!initialized || !roomId) {
-      console.error("Initialized or room id does not exist");
-      return;
-    }
-    if (!connected) {
-      console.error("Socket not connected");
-      return;
-    }
+  // function addOptimisticMessage(
+  //   setSentMessages: (val: any) => void,
+  //   { tempId, roomId, user, message }
+  // ) {
+  //   let tagged: any = null;
+  //   if (selectedMessageId) {
+  //     console.log(sentMessages);
 
-    const tempId = makeClientId();
+  //     const found = (sentMessages || []).find(
+  //       (m: any) => (m._id || m.id) === selectedMessageId
+  //     );
+  //     if (found) {
+  //       console.log("found");
 
-    // scroll to bottom
-    messagesRef.current?.scrollTo({
-      top: messagesRef.current?.scrollHeight || 0,
-      behavior: "smooth",
-    });
+  //       tagged = {
+  //         _id: found._id || found.id,
+  //         message: found.message,
+  //         from:
+  //           typeof found.from === "string" ? { _id: found.from } : found.from,
+  //       };
+  //     }
+  //   }
+  //   if (!tagged && selectedTag) {
+  //     tagged = selectedTag;
+  //   }
 
-    addOptimisticMessage(setSentMessages, { tempId, roomId, user, message });
+  //   const optimistic: ChatMessage = {
+  //     id: tempId,
+  //     tempId,
+  //     conversationId: roomId,
+  //     from: { _id: user?._id },
+  //     message,
+  //     ts: new Date().toISOString(),
+  //     status: "sending",
+  //     taggedMessage: tagged || undefined,
+  //   };
 
-    const payload = {
-      id: tempId,
-      roomId,
-      message,
-      from: user._id,
-      taggedMessage: selectedMessageId ? selectedMessageId : "",
-    };
+  //   setSentMessages((prev: any) => {
+  //     const base = Array.isArray(prev) ? (prev as ChatMessage[]) : [];
+  //     return [...base, optimistic];
+  //   });
+  // }
 
-    console.log("payload: ", payload);
-
-    let ackHandled = false;
-
-    // 3) set a timeout in case the ack never arrives
-    const ackTimeout = setTimeout(() => {
-      if (!ackHandled) {
-        setSentMessages((prev: any) => {
-          if (!Array.isArray(prev)) return prev;
-          return prev.map((m: any) =>
-            m.id === tempId ? { ...m, status: "failed" } : m
-          );
-        });
-        console.error("send-message ack timeout (message marked failed)");
-      }
-    }, 10000);
-
-    emit("send-message", payload, (ack: any) => {
-      ackHandled = true;
-      clearTimeout(ackTimeout);
-
-      if (!ack) {
-        console.error("no ack from server");
-        setSentMessages((prev: any) => {
-          if (!Array.isArray(prev)) return prev;
-          return prev.map((m: any) =>
-            m.id === tempId ? { ...m, status: "failed" } : m
-          );
-        });
-        return;
-      }
-
-      if (ack.status === "error") {
-        console.error("send error:", ack.error);
-        setSentMessages((prev: any) => {
-          if (!Array.isArray(prev)) return prev;
-          return prev.map((m: any) =>
-            m.id === tempId ? { ...m, status: "failed" } : m
-          );
-        });
-        return;
-      }
-
-      // success — server payload should include clientId
-      const serverPayload = ack.payload;
-
-      console.log("ack-payload: ", serverPayload);
-
-      // Prefer server to include clientId; if not, server could include it in another key
-      const clientIdFromServer =
-        serverPayload.clientId || serverPayload.tempId || tempId;
-
-      const normalized: ChatMessage =
-        serverPayload && typeof serverPayload.from === "string"
-          ? {
-              id: serverPayload.id || serverPayload._id,
-              tempId: clientIdFromServer,
-              conversationId: serverPayload.conversationId || roomId,
-              from: {
-                _id: serverPayload.from,
-              },
-              message: serverPayload.message,
-              ts: serverPayload.ts || new Date().toISOString(),
-              status: serverPayload.status || "sent",
-            }
-          : { ...serverPayload, tempId: clientIdFromServer };
-
-      setSentMessages((prev: any) => {
-        if (!Array.isArray(prev)) return [normalized];
-        const optimistic = (prev as ChatMessage[]).find(
-          (m: any) => m.id === tempId
-        );
-        const merged = {
-          ...normalized,
-          taggedMessage:
-            (normalized as any).taggedMessage ??
-            (optimistic as any)?.taggedMessage,
-        } as ChatMessage;
-        return (prev as ChatMessage[]).map((m: ChatMessage) =>
-          m.id === tempId ? merged : m
-        );
-      });
-    });
-
-    setMessage("");
-    setSelectedMessageId(null);
-    setSelectedTag(null);
-  }
+  const { sendMessage } = useSendMessage({
+    emit,
+    roomId,
+    userId: user?._id,
+    initialized,
+    connected,
+    selectedMessageId,
+    selectedTag,
+    sentMessages,
+    setSentMessages,
+  });
 
   useEffect(() => {
     if (!on) return;
 
     const handleIncoming = (incoming: any) => {
-      messagesRef.current?.scrollTo({
-        top: messagesRef.current?.scrollHeight || 0,
-        behavior: "smooth",
-      });
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: containerRef.current.scrollHeight || 0,
+          behavior: "smooth",
+        });
+      }
       const normalized: ChatMessage =
         incoming && typeof incoming.from === "string"
           ? {
@@ -256,8 +191,16 @@ export default function ChatUI() {
               message: incoming.message,
               ts: incoming.ts,
               status: incoming.status || "sent",
+              attachments: formatAttachments(
+                incoming.attachment || incoming.attachments
+              ),
             }
-          : incoming;
+          : {
+              ...incoming,
+              attachments: formatAttachments(
+                incoming.attachment || incoming.attachments
+              ),
+            };
       setSentMessages((prev: any) => {
         const base = Array.isArray(prev) ? (prev as ChatMessage[]) : [];
         return [...base, normalized];
@@ -332,8 +275,21 @@ export default function ChatUI() {
     <div className="flex flex-col h-full w-full bg-[#FEFFFC]">
       {roomId ? (
         <>
-          {" "}
           <header className="bg-[#28282B] w-full p-3 h-16 flex items-center justify-between text-white">
+            {selectedImage &&
+            selectedImage.images &&
+            selectedImage.images.length > 0 ? (
+              <div className="fixed bottom-0 z-50 p-2 bg-gray-700 w-[500px]">
+                <SelectedFilePreview fileType="media" />
+              </div>
+            ) : selectedDoc &&
+              selectedDoc.docs &&
+              selectedDoc.docs.length > 0 ? (
+              <div className="fixed bottom-0 z-50 p-2 bg-gray-700 w-[500px]">
+                <SelectedFilePreview fileType="doc" />
+              </div>
+            ) : null}
+
             <div className="flex flex-col gap-2">
               <span>{conversationTitle}</span>
               <span className="text-xs">
@@ -394,7 +350,12 @@ export default function ChatUI() {
                     }
                     time={m.ts}
                     status={m.status || ""}
-                    taggedMessage={m.taggedMessage}
+                    attachments={m.attachments}
+                    taggedMessage={
+                      m.taggedMessage
+                        ? enrichTaggedMessage(m.taggedMessage)
+                        : undefined
+                    }
                     taggedUser={(() => {
                       const ownerId =
                         m.taggedMessage &&
@@ -472,6 +433,48 @@ export default function ChatUI() {
                 <div className="w-1 h-8 bg-emerald-400 rounded-sm" />
                 <div className="flex flex-col">
                   <span className="text-xs text-gray-600">Replying to</span>
+                  {(() => {
+                    const ra =
+                      (replyMessage as any)?.attachment ||
+                      (replyMessage as any)?.attachments;
+                    console.log("attch", ra);
+
+                    return ra && ra.length > 0 ? (
+                      <div className="flex gap-1 mt-1">
+                        {ra.slice(0, 3).map((a: any, i: number) => {
+                          const isVideo = /^(mp4|webm|ogg)$/i.test(
+                            a.format || ""
+                          );
+                          const isImage = /^(jpg|jpeg|png|gif|webp)$/i.test(
+                            a.format || ""
+                          );
+                          return (
+                            <div
+                              key={i}
+                              className="w-10 h-10 rounded overflow-hidden"
+                            >
+                              {isImage ? (
+                                <img
+                                  src={a.url}
+                                  alt={a.name || "media"}
+                                  className="w-10 h-10 object-cover"
+                                />
+                              ) : isVideo ? (
+                                <video
+                                  src={a.url}
+                                  className="w-10 h-10 object-cover"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 text-[10px] flex items-center justify-center bg-gray-200 text-gray-600">
+                                  DOC
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : null;
+                  })()}
                   <span className="text-sm text-gray-800 truncate w-full">
                     {replyMessage.message}
                   </span>
@@ -487,8 +490,48 @@ export default function ChatUI() {
           )}
           <form
             className="border-t border-brandSky px-2 flex items-center h-14 bg-white "
-            onSubmit={handleSubmit}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (containerRef.current) {
+                containerRef.current.scrollTo({
+                  top: containerRef.current.scrollHeight || 0,
+                  behavior: "smooth",
+                });
+              }
+              sendMessage(message);
+              setMessage("");
+              setSelectedMessageId(null);
+              setSelectedTag(null);
+            }}
           >
+            <div className="flex items-center gap-5 pr-5">
+              <button
+                className={`p-1 rounded-md cursor-pointer hover:bg-sky-300 hover:text-white grow-0`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAreaClicked(!isAreaClicked);
+                }}
+              >
+                <LucideSmile size={20} />
+              </button>
+              <div
+                ref={emojiRef}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                className={`-bottom-[145px] fixed transition-transform duration-500 ease-in-out ${
+                  isAreaClicked ? "translate-y-100" : "-translate-y-50"
+                }`}
+              >
+                <EmojiPicker
+                  autoFocusSearch
+                  lazyLoadEmojis={true}
+                  onEmojiClick={(e) => {
+                    setMessage((prev) => prev + e.emoji);
+                  }}
+                />
+              </div>
+              <FileModal openShare={openShare} setOpenShare={setOpenShare} />
+            </div>
             <input
               type="text"
               className="text-black grow px-2 py-1 h-full outline-none placeholder:text-gray-400"
