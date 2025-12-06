@@ -97,7 +97,7 @@ export default function Onboard() {
               )}
             </div>
             <button
-              className="bg-brandSky py-2 px-3 rounded-md text-white font-sans disabled:bg-blue-200 w-full flex justify-center mt-3"
+              className="bg-sky-300 py-2 px-3 rounded-md text-white font-sans disabled:bg-blue-200 w-full flex justify-center mt-3 cursor-pointer hover:opacity-90"
               disabled={isLoading}
             >
               {isLoading ? (
