@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
 export default function useSocket({
-  url = "http://localhost:3000",
+  url = "https://tapo-server.onrender.com",
   token = null,
   userId = null,
 }: {
