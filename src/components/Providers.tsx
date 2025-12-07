@@ -70,7 +70,7 @@ export default function Providers({ children }) {
 
     return (
       <SocketContextProvider
-        url="https://tapo-server.onrender.com"
+        url="http://localhost:3000"
         token={null}
         userId={user?._id || ""}
       >

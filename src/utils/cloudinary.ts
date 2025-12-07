@@ -16,10 +16,23 @@ export async function uploadFileToCloudinary(
   file: File,
   signData: Record<string, string | number>
 ): Promise<CloudinaryUploadResponse> {
-  const resourceType = file.type.startsWith("image/")
+  const mime = file.type || "";
+  const ext =
+    (file.name || "").toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] || "";
+  const resourceType = mime.startsWith("image/")
     ? "image"
-    : file.type.startsWith("video/")
+    : mime.startsWith("video/")
     ? "video"
+    : ext === "pdf" ||
+      ext === "csv" ||
+      ext === "txt" ||
+      ext === "doc" ||
+      ext === "docx" ||
+      ext === "ppt" ||
+      ext === "pptx" ||
+      ext === "xls" ||
+      ext === "xlsx"
+    ? "raw"
     : "raw";
   const url = `https://api.cloudinary.com/v1_1/${
     import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
@@ -30,20 +43,22 @@ export async function uploadFileToCloudinary(
   formData.append("timestamp", signData.timestamp.toString());
   if (signData.eager) formData.append("eager", signData.eager.toString());
   formData.append("signature", signData.signature.toString());
-
-  console.log("signature: ", signData.signature);
+  // Force public delivery; avoid authenticated/private which requires signed delivery URLs
+  formData.append("type", "upload");
+  formData.append("access_mode", "public");
 
   if (signData.folder) {
     formData.append("folder", signData.folder.toString());
-
-    console.log("folder: ", signData.folder);
   }
 
   try {
     const response = await axios.post(url, formData);
     return response.data;
-  } catch (error) {
-    console.error("Error uploading file to Cloudinary:", error);
+  } catch (error: any) {
+    console.error(
+      "Error uploading file to Cloudinary:",
+      error?.response?.data || error
+    );
     throw error;
   }
 }
