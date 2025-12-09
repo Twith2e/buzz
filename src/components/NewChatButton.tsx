@@ -88,7 +88,7 @@ const NewChatButton = () => {
               <div>Loading...</div>
             ) : isSearching ? (
               <div className="text-center flex items-center justify-center gap-2 text-xs text-accent-dark">
-                <Loader className="animate-spin" />
+                <Loader className="animate-spin" size={12}/>
                 <span>Searching...</span>
               </div>
             ) : result ? (

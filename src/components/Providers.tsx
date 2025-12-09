@@ -5,6 +5,8 @@ import { UserContextProvider, useUserContext } from "../contexts/UserContext";
 import ConversationContextProvider from "@/contexts/ConversationContext";
 import { useEffect } from "react";
 import { registerForFCM, onForegroundMessage } from "@/utils/fcm";
+import { NavigationProvider } from "@/contexts/NavigationContext";
+import StatusContextProvider from "@/contexts/StatusContext";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -70,7 +72,8 @@ export default function Providers({ children }) {
 
     return (
       <SocketContextProvider
-        url="https://tapo-server.onrender.com"
+        // url="https://tapo-server.onrender.com"
+        url="http://localhost:3000"
         token={null}
         userId={user?._id || ""}
       >
@@ -82,7 +85,11 @@ export default function Providers({ children }) {
     <Router>
       <QueryClientProvider client={queryClient}>
         <UserContextProvider>
-          <SocketWithUser>{children}</SocketWithUser>
+          <NavigationProvider>
+            <StatusContextProvider>
+              <SocketWithUser>{children}</SocketWithUser>
+            </StatusContextProvider>
+          </NavigationProvider>
         </UserContextProvider>
       </QueryClientProvider>
     </Router>

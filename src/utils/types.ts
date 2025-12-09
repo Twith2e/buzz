@@ -71,7 +71,13 @@ export type Conversation = {
     from: string;
     message: string;
     ts: string;
-    attachments: [];
+    attachments: Array<{
+      url: string;
+      format: string;
+      size: number;
+      fileName: string;
+      _id: string;
+    }>;
     status: "sent" | string;
     createdAt: string;
     updatedAt: string;
@@ -173,4 +179,32 @@ export type CloudinaryUploadResponse = {
     }
   ];
   api_key: string;
+};
+
+export type Status = {
+  _id: string;
+  userId: string;
+  publicId: string;
+  url: string;
+  resourceType: string;
+  caption: string;
+  expiresAt: string;
+  viewers: Array<string>;
+  createdAt: string;
+  __v: number;
+};
+
+export type VisibleStatus = {
+  _id: string;
+  displayName: string;
+  profilePic: string | null;
+  latest: string;
+  total: number;
+  statuses: Array<Status>;
+};
+
+export type StatusResponse = {
+  status: true;
+  mine: Array<Status>;
+  visible: Array<VisibleStatus>;
 };

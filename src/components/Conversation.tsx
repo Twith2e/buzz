@@ -3,7 +3,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import api from "@/utils/api";
 import { Conversation, MessageResponse } from "@/utils/types";
 import { formatTime } from "@/lib/utils";
-import { LucideUser2 } from "lucide-react";
+import { LucideFile, LucideUser2 } from "lucide-react";
 
 const Convo = ({ conversation }: { conversation: Conversation }) => {
   const { user } = useUserContext();
@@ -31,6 +31,17 @@ const Convo = ({ conversation }: { conversation: Conversation }) => {
     }
   }
 
+  // helper to safely return last attachment filename
+  function getLastAttachmentFileName(lastMessage: any) {
+    const at = lastMessage?.attachments;
+    if (!at || !Array.isArray(at) || at.length === 0) return null;
+    return <span className="flex items-center gap-2"><LucideFile size={14} /> {at[at.length - 1]?.fileName}</span>
+  }
+
+  const lastAttachmentFileName = getLastAttachmentFileName(
+    conversation.lastMessage
+  );
+
   return (
     <div
       key={conversation._id}
@@ -49,16 +60,14 @@ const Convo = ({ conversation }: { conversation: Conversation }) => {
         </div>
         <div className="flex flex-col items-start w-full">
           <span className="max-w-[80%] truncate">
-            {conversation.title !== ""
-              ? conversation.title
-              : userContact?.localName || otherUser?.email}
+            {computedTitle}
           </span>
           <span className="text-xs text-[#AAA] truncate max-w-[90%]">
             {conversation.lastMessage
-              ? conversation.lastMessage.message
+              ? lastAttachmentFileName ?? conversation.lastMessage.message
               : conversation.creator === user._id
-              ? "You created this group"
-              : "You were added"}
+                ? "You created this group"
+                : "You were added"}
           </span>
         </div>
       </div>

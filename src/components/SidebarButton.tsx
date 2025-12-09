@@ -1,4 +1,5 @@
 import { IconType } from "react-icons/lib";
+import { useNavigation } from "@/contexts/NavigationContext";
 
 export default function SidebarButton({
   icon: Icon,
@@ -13,8 +14,16 @@ export default function SidebarButton({
   expanded: boolean;
   id: number;
 }) {
+  const { push } = useNavigation();
+
+  function handleClick() {
+    if (text.toLowerCase() === "story") push("status");
+    else if (text.toLowerCase() === "conversations") push("chat");
+  }
+
   return (
     <button
+      onClick={handleClick}
       key={id}
       className="flex items-center hover:bg-gray-400 w-full px-3 py-[.7rem] transition-all duration-300"
       title={text}

@@ -2,7 +2,7 @@ import axios from "axios";
 import api from "./api";
 import { CloudinaryUploadResponse } from "./types";
 
-export async function getCloudinarySignature(folder: string) {
+export async function getCloudinarySignature(folder?: string) {
   try {
     const response = await api.post("/upload/sign", { folder });
     return response.data;
