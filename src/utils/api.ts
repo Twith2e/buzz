@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: `${import.meta.env.VITE_API_URL}/api/v1`,
   withCredentials: true,
 });
 
@@ -44,7 +44,7 @@ api.interceptors.request.use(
         isRefreshing = true;
         return axios
           .post(
-            "https://tapo-server.onrender.com/api/v1/users/refresh-token",
+            `${import.meta.env.VITE_API_URL}/api/v1/users/refresh-token`,
             {},
             { withCredentials: true }
           )
@@ -97,7 +97,7 @@ api.interceptors.response.use(
 
         try {
           const { data } = await axios.post(
-            "https://tapo-server.onrender.com/api/v1/users/refresh-token",
+            `${import.meta.env.VITE_API_URL}/api/v1/users/refresh-token`,
             {},
             { withCredentials: true }
           );

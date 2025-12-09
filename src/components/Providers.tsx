@@ -72,8 +72,7 @@ export default function Providers({ children }) {
 
     return (
       <SocketContextProvider
-        // url="https://tapo-server.onrender.com"
-        url="http://localhost:3000"
+        url={`${import.meta.env.VITE_API_URL}`}
         token={null}
         userId={user?._id || ""}
       >

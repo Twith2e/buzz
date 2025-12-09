@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 
 export default function useSocket({
-  url = "http://localhost:3000",
-  // url = "https://tapo-server.onrender.com",
+  url = import.meta.env.VITE_API_URL,
   token = null,
   userId = null,
 }: {
