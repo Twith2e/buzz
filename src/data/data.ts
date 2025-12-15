@@ -143,3 +143,5 @@ export const DOC_ACCEPT = [
   ".csv",
   ".txt",
 ].join(", ");
+
+export const THEME_KEY = "app.theme.choice";

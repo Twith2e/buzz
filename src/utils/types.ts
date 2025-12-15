@@ -43,6 +43,12 @@ export type ContactListResponse = {
   contacts: Contact[];
 };
 
+export type AddContactResponse = {
+  message: string;
+  success: boolean;
+  contact: Contact;
+};
+
 export type FindContactResponse = {
   matched: boolean;
   user: Partial<User>;
@@ -101,7 +107,13 @@ export type Message = {
   };
   message: string;
   ts: string;
-  attachments: [];
+  attachments: Array<{
+    url: string;
+    format: string;
+    size: number;
+    fileName: string;
+    _id: string;
+  }>;
   status: "sent" | string;
   taggedMessage: TaggedMessage;
   createdAt: string;
@@ -207,4 +219,11 @@ export type StatusResponse = {
   status: true;
   mine: Array<Status>;
   visible: Array<VisibleStatus>;
+};
+
+export type Theme = "system" | "light" | "dark";
+
+export type ThemeChangeSettings = {
+  status: true;
+  settings: { _id: string };
 };

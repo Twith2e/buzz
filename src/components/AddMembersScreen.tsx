@@ -20,59 +20,61 @@ const AddMembers = ({
           </div>
         </div>
       )}
-
-      {alphabets.map(
-        (alphabet) =>
-          alphabet.contacts?.length > 0 && (
-            <div className="px-3" key={alphabet.value}>
-              <h2 className="text-lg font-bold">
-                {alphabet.contacts?.length > 0 && alphabet.name}
-              </h2>
-              <ul className="bg-white rounded-lg p-2">
-                {alphabet.contacts &&
-                  alphabet.contacts.length > 0 &&
-                  alphabet.contacts.map((contact) => (
-                    <li
-                      className="flex justify-between items-center"
-                      key={contact._id}
-                    >
-                      <label className="w-full" htmlFor={contact._id}>
-                        {contact.localName}
-                      </label>
-                      <input
-                        className="h-4 w-4 accent-blue-500"
-                        checked={selectedContacts.includes(
-                          contact.contactProfile._id
-                        )}
-                        onChange={() => {
-                          if (
-                            selectedContacts.includes(
-                              contact.contactProfile._id
-                            )
-                          ) {
-                            setSelectedContacts(
-                              selectedContacts.filter(
-                                (selectedContact) =>
-                                  selectedContact !== contact.contactProfile._id
+      <div>
+        {alphabets.map(
+          (alphabet) =>
+            alphabet.contacts?.length > 0 && (
+              <div className="px-3" key={alphabet.value}>
+                <h2 className="text-lg font-bold">
+                  {alphabet.contacts?.length > 0 && alphabet.name}
+                </h2>
+                <ul className="space-y-3 mb-3">
+                  {alphabet.contacts &&
+                    alphabet.contacts.length > 0 &&
+                    alphabet.contacts.map((contact) => (
+                      <li
+                        className="flex justify-between items-center bg-white p-2 rounded-lg border"
+                        key={contact._id}
+                      >
+                        <label className="w-full" htmlFor={contact._id}>
+                          {contact.localName}
+                        </label>
+                        <input
+                          className="h-4 w-4 accent-blue-500"
+                          checked={selectedContacts.includes(
+                            contact.contactProfile._id
+                          )}
+                          onChange={() => {
+                            if (
+                              selectedContacts.includes(
+                                contact.contactProfile._id
                               )
-                            );
-                          } else {
-                            setSelectedContacts([
-                              ...selectedContacts,
-                              contact.contactProfile._id,
-                            ]);
-                          }
-                        }}
-                        type="checkbox"
-                        name="contact"
-                        id={contact._id}
-                      />
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          )
-      )}
+                            ) {
+                              setSelectedContacts(
+                                selectedContacts.filter(
+                                  (selectedContact) =>
+                                    selectedContact !==
+                                    contact.contactProfile._id
+                                )
+                              );
+                            } else {
+                              setSelectedContacts([
+                                ...selectedContacts,
+                                contact.contactProfile._id,
+                              ]);
+                            }
+                          }}
+                          type="checkbox"
+                          name="contact"
+                          id={contact._id}
+                        />
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )
+        )}
+      </div>
     </>
   );
 };

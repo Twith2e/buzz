@@ -48,10 +48,10 @@ const NewChatButton = () => {
             <LucidePlus size={24} />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-80 p-5 space-y-5 max-h-96">
-          <DropdownMenuGroup className="fixed top-5 w-full">
+        <DropdownMenuContent className="w-80 px-5 pb-5 pt-0 space-y-5 max-h-96 relative bg-white">
+          <DropdownMenuGroup className="sticky top-0 left-0 bg-white z-50 pt-3 w-full">
             <DropdownMenuLabel>New Chat</DropdownMenuLabel>
-            <div className="border-b-2 border-b-sky rounded-md border w-[85%]">
+            <div className="border-b-2 border-b-sky-300 rounded-md border w-full">
               <input
                 className="h-8 px-2 text-sm outline-none w-full"
                 placeholder="Search name or email"
@@ -60,7 +60,7 @@ const NewChatButton = () => {
               />
             </div>
           </DropdownMenuGroup>
-          <DropdownMenuGroup className="overflow-y-auto mt-20 space-y-4">
+          <DropdownMenuGroup className="overflow-y-auto space-y-4">
             <DropdownMenuItem
               onSelect={() => {
                 setOpen(true);
@@ -88,7 +88,7 @@ const NewChatButton = () => {
               <div>Loading...</div>
             ) : isSearching ? (
               <div className="text-center flex items-center justify-center gap-2 text-xs text-accent-dark">
-                <Loader className="animate-spin" size={12}/>
+                <Loader className="animate-spin" size={12} />
                 <span>Searching...</span>
               </div>
             ) : result ? (
@@ -110,16 +110,19 @@ const NewChatButton = () => {
                   ) : (
                     <LucideCircleUserRound />
                   )}
-                  <span className="text-sm">{result.email}</span>
+                  <span className="text-sm">
+                    {contacts.find((contact) => contact.email === result.email)
+                      ?.localName || result.email}
+                  </span>
                 </div>
               </>
             ) : contacts && contacts.length ? (
               contacts.map((contact) => (
                 <DropdownMenuItem key={contact._id}>
                   <div className="flex gap-2 items-center">
-                    {contact.contactProfile.profilePic ? (
+                    {contact.contactProfile?.profilePic ? (
                       <img
-                        src={contact.contactProfile.profilePic}
+                        src={contact.contactProfile?.profilePic}
                         alt={contact.localName}
                       />
                     ) : (

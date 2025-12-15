@@ -12,6 +12,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import { useStatusContext } from "@/contexts/StatusContext";
 import { formatTime } from "@/lib/utils";
 import { Status as StatusType, VisibleStatus } from "@/utils/types";
+import StatusRing from "./StatusRing";
 
 const Status = () => {
   const { status, setStatus } = useStatusContext();
@@ -192,7 +193,7 @@ const Status = () => {
     );
 
     return off;
-  }, [on, user?._id, setStatus]);
+  }, [on, user?._id, setStatus, contactList]);
 
   const myLastStatus =
     status.mine?.length > 0 ? status.mine[status.mine.length - 1] : null;
@@ -244,41 +245,12 @@ const Status = () => {
               className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-50 cursor-pointer -mx-2 transition-colors group"
               onClick={() => myLastStatus && setViewingStatus(status.mine)}
             >
-              <div className="relative">
-                <div
-                  className={`w-14 h-14 rounded-full overflow-hidden border-2 ${
-                    myLastStatus
-                      ? "border-emerald-500 p-[2px]"
-                      : "border-gray-200"
-                  }`}
-                >
-                  <img
-                    src={
-                      user?.profilePic ||
-                      `https://ui-avatars.com/api/?name=${user?.displayName}&background=random`
-                    }
-                    alt="My Profile"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </div>
-                {!myLastStatus && (
-                  <label
-                    htmlFor="status-camera-add"
-                    className="absolute bottom-0 right-0 bg-emerald-500 rounded-full p-1 border-2 border-white cursor-pointer"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <LucidePlus size={14} color="white" />
-                    <input
-                      type="file"
-                      name="status-camera-add"
-                      id="status-camera-add"
-                      accept="image/*,video/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-              </div>
+              <StatusRing
+                count={status.mine.length}
+                viewed={false}
+                profilePic={user?.profilePic}
+                displayName={user?.displayName}
+              />
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900">My Status</h3>
                 <p className="text-sm text-gray-500">
@@ -320,13 +292,11 @@ const Status = () => {
                         className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-50 cursor-pointer -mx-2 transition-colors"
                         onClick={() => setViewingStatus(s.statuses)}
                       >
-                        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-emerald-500 p-[2px]">
-                          <img
-                            src={profilePic}
-                            alt={displayName}
-                            className="w-full h-full object-cover rounded-full"
-                          />
-                        </div>
+                        <StatusRing
+                          count={s.statuses.length}
+                          displayName={displayName}
+                          profilePic={profilePic}
+                        />
                         <div className="flex-1">
                           <h3 className="font-semibold text-gray-900">
                             {displayName}

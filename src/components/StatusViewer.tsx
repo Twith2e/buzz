@@ -1,3 +1,5 @@
+import { formatRelativeTime } from "@/lib/utils";
+import { useUserContext } from "@/contexts/UserContext";
 import { Status } from "@/utils/types";
 import { LucideX } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
@@ -14,7 +16,25 @@ const StatusViewer = ({ status: statuses, onClose }: StatusViewerProps) => {
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const { contactList, user } = useUserContext();
+
   const currentStatus = statuses[currentIndex];
+  // Calculate relative time for the current status
+  const relativeTime = currentStatus
+    ? formatRelativeTime(currentStatus.createdAt)
+    : "";
+
+  const viewingContact = contactList.find(
+    (contact) => contact.contactProfile._id === currentStatus?.userId
+  );
+
+  const displayName = viewingContact
+    ? viewingContact.localName
+    : user?.displayName || "My Status";
+  const profilePic =
+    viewingContact?.contactProfile?.profilePic ||
+    user?.profilePic ||
+    `https://ui-avatars.com/api/?name=${displayName}&background=random`;
 
   useEffect(() => {
     setProgress(0);
@@ -109,7 +129,17 @@ const StatusViewer = ({ status: statuses, onClose }: StatusViewerProps) => {
       {/* Header Controls */}
       <div className="absolute top-8 left-0 right-0 z-20 px-4 flex justify-between items-center mt-2">
         <div className="flex items-center gap-2">
-          {/* Potential user info here if needed in future */}
+          <div className="text-white flex gap-2 items-center text-sm">
+            <img
+              src={profilePic}
+              alt={displayName}
+              className="w-10 h-10 object-cover rounded-full"
+            />
+            <div>
+              <h2>{displayName}</h2>
+              <span>{relativeTime}</span>
+            </div>
+          </div>
         </div>
         <button
           onClick={onClose}

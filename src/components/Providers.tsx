@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import { registerForFCM, onForegroundMessage } from "@/utils/fcm";
 import { NavigationProvider } from "@/contexts/NavigationContext";
 import StatusContextProvider from "@/contexts/StatusContext";
+import { ThemeContextProvider } from "@/contexts/ThemeContext";
+import { WebRTCProvider } from "@/contexts/WebRTCContext";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -86,7 +88,11 @@ export default function Providers({ children }) {
         <UserContextProvider>
           <NavigationProvider>
             <StatusContextProvider>
-              <SocketWithUser>{children}</SocketWithUser>
+              <ThemeContextProvider>
+                <SocketWithUser>
+                  <WebRTCProvider>{children}</WebRTCProvider>
+                </SocketWithUser>
+              </ThemeContextProvider>
             </StatusContextProvider>
           </NavigationProvider>
         </UserContextProvider>

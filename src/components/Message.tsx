@@ -6,6 +6,7 @@ import {
   LucideInfo,
 } from "lucide-react";
 import type { TaggedMessage } from "@/utils/types";
+import { useUserContext } from "@/contexts/UserContext";
 
 const Message = ({
   message,
@@ -18,6 +19,7 @@ const Message = ({
   taggedOwnerIsUser,
   handleRightClick,
   onTagClick,
+  sender,
 }: {
   message: string;
   isUser: boolean;
@@ -36,9 +38,13 @@ const Message = ({
   taggedUser?: string;
   taggedMessage?: TaggedMessage | { message: string };
   taggedOwnerIsUser?: boolean;
+  sender?: string;
   handleRightClick?: (e: React.MouseEvent) => void;
   onTagClick?: () => void;
 }) => {
+  const { contactList } = useUserContext();
+  if (sender) console.log(sender);
+
   return (
     <div
       className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
@@ -102,7 +108,7 @@ const Message = ({
                             <video src={url} className="w-8 h-8 object-cover" />
                           ) : (
                             <div className="w-8 h-8 text-[8px] flex items-center justify-center bg-gray-200 text-gray-600">
-                              DOC
+                              {a.name || a.filename || a.fileName || "Document"}
                             </div>
                           )}
                         </div>
@@ -112,7 +118,7 @@ const Message = ({
                 );
               })()}
               <span className="text-[10px] opacity-70">
-                {taggedUser || "YOU"}
+                {taggedUser || "You"}
               </span>
               <span className="text-xs truncate">{taggedMessage.message}</span>
             </div>
@@ -176,9 +182,17 @@ const Message = ({
         )}
 
         {message && message.trim().length > 0 && (
-          <span className="block wrap-break-word pr-12 mb-4 leading-relaxed">
-            {message}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-black text-xs">
+              {sender &&
+                !isUser &&
+                contactList.find((u) => u.contactProfile._id === sender)
+                  ?.localName}
+            </span>
+            <span className="block wrap-break-word pr-12 mb-4 leading-relaxed">
+              {message}
+            </span>
+          </div>
         )}
 
         {/* Time + ticks (WhatsApp-style bottom right) */}

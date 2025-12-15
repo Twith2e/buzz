@@ -99,7 +99,7 @@ export function useSendMessage({
       }
 
       const payload = {
-        id: tempId,
+        tempId,
         roomId,
         message: text || "",
         from: userId,

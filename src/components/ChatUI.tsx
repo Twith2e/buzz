@@ -1,6 +1,4 @@
 import { LuSendHorizontal } from "react-icons/lu";
-import { IoMdCall } from "react-icons/io";
-import { HiOutlineVideoCamera } from "react-icons/hi2";
 import { useSocketContext } from "../contexts/SocketContext";
 import { useState, useRef } from "react";
 import { useEffect } from "react";
@@ -12,12 +10,13 @@ import { formatAttachments, formatTime } from "@/lib/utils";
 import type { ChatMessage } from "@/utils/types";
 import useReadObserver from "@/hooks/useReadObserver";
 import { useGetConversations } from "@/services/conversation/conversation";
-import { LucideSmile, LucideX } from "lucide-react";
+import { LucidePhone, LucideSmile, LucideVideo, LucideX } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
-// import { Theme, EmojiStyle } from "emoji-picker-react";
 import FileModal from "./FileModal";
 import SelectedFilePreview from "./SelectedFilePreview";
 import { useSendMessage } from "@/hooks/useSendMessage";
+import ConversationTitle from "./ConversationTitle";
+import { useWebRTC } from "@/contexts/WebRTCContext";
 
 export default function ChatUI() {
   const [openShare, setOpenShare] = useState(false);
@@ -55,13 +54,16 @@ export default function ChatUI() {
     setSelectedMessageId,
     selectedImage,
     selectedDoc,
+    currentConversation,
   } = useConversationContext();
+  const { startCall, callState } = useWebRTC();
   const { containerRef, registerMessageRef } = useReadObserver({
     emit,
     roomId,
     userId: user?._id,
   });
   const emojiRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -71,6 +73,54 @@ export default function ChatUI() {
       });
     }
   }, [roomId]);
+
+  useEffect(() => {
+    // conditions when we should NOT autofocus
+    const shouldSkipFocus =
+      !roomId || // no conversation selected
+      !initialized || // not initialized yet
+      !connected || // socket not connected (optional)
+      isAreaClicked || // emoji picker open
+      openShare || // file modal open
+      Boolean(selectedImage) || // preview open
+      Boolean(selectedDoc); // doc preview open
+
+    if (shouldSkipFocus) return;
+
+    // ensure input is mounted/painted
+    const id = window.requestAnimationFrame(() => {
+      if (inputRef.current) {
+        try {
+          inputRef.current.focus();
+          // move caret to end
+          const len = inputRef.current.value?.length || 0;
+          inputRef.current.setSelectionRange(len, len);
+        } catch (err) {
+          // ignore errors on mobile browsers that block focus
+        }
+      }
+    });
+
+    // cleanup
+    return () => cancelAnimationFrame(id);
+  }, [
+    roomId,
+    initialized,
+    connected,
+    isAreaClicked,
+    openShare,
+    selectedImage,
+    selectedDoc,
+  ]);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+    // focus after message is sent
+    const id = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+    return () => clearTimeout(id);
+  }, [sentMessages?.length]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -98,7 +148,7 @@ export default function ChatUI() {
       })
     : [];
 
-  const replyMessage = selectedMessageId
+  let replyMessage = selectedMessageId
     ? (sentMessages || []).find(
         (m: any) => (m._id || m.id) === selectedMessageId
       )
@@ -116,49 +166,6 @@ export default function ChatUI() {
     if (!att || att.length === 0) return tm;
     return { ...tm, attachments: att, attachment: att };
   }
-
-  // function addOptimisticMessage(
-  //   setSentMessages: (val: any) => void,
-  //   { tempId, roomId, user, message }
-  // ) {
-  //   let tagged: any = null;
-  //   if (selectedMessageId) {
-  //     console.log(sentMessages);
-
-  //     const found = (sentMessages || []).find(
-  //       (m: any) => (m._id || m.id) === selectedMessageId
-  //     );
-  //     if (found) {
-  //       console.log("found");
-
-  //       tagged = {
-  //         _id: found._id || found.id,
-  //         message: found.message,
-  //         from:
-  //           typeof found.from === "string" ? { _id: found.from } : found.from,
-  //       };
-  //     }
-  //   }
-  //   if (!tagged && selectedTag) {
-  //     tagged = selectedTag;
-  //   }
-
-  //   const optimistic: ChatMessage = {
-  //     id: tempId,
-  //     tempId,
-  //     conversationId: roomId,
-  //     from: { _id: user?._id },
-  //     message,
-  //     ts: new Date().toISOString(),
-  //     status: "sending",
-  //     taggedMessage: tagged || undefined,
-  //   };
-
-  //   setSentMessages((prev: any) => {
-  //     const base = Array.isArray(prev) ? (prev as ChatMessage[]) : [];
-  //     return [...base, optimistic];
-  //   });
-  // }
 
   const { sendMessage } = useSendMessage({
     emit,
@@ -205,9 +212,6 @@ export default function ChatUI() {
         const base = Array.isArray(prev) ? (prev as ChatMessage[]) : [];
         return [...base, normalized];
       });
-      console.log("normalized: ", normalized);
-
-      console.log("message:received-roomId:", roomId);
 
       emit("message:received", {
         messageId: normalized.id || normalized._id,
@@ -272,10 +276,10 @@ export default function ChatUI() {
   }, [on, setUsersOnline]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#FEFFFC]">
+    <div className="flex flex-col h-full w-full bg-background">
       {roomId ? (
         <>
-          <header className="bg-[#28282B] w-full p-3 h-16 flex items-center justify-between text-white">
+          <header className="bg-background dark:bg-matteBlack text-foreground w-full p-3 h-16 border-b flex items-center justify-between">
             {selectedImage &&
             selectedImage.images &&
             selectedImage.images.length > 0 ? (
@@ -291,7 +295,9 @@ export default function ChatUI() {
             ) : null}
 
             <div className="flex flex-col gap-2">
-              <span>{conversationTitle}</span>
+              <span>
+                <ConversationTitle title={conversationTitle} />
+              </span>
               <span className="text-xs">
                 {isGroup && participantNames.length > 0
                   ? participantNames.join(", ")
@@ -305,12 +311,26 @@ export default function ChatUI() {
                     )}`}
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              <button type="button">
-                <HiOutlineVideoCamera />
+            <div className="flex flex-row-reverse items-center gap-4 pr-4">
+              <button
+                className="cursor-pointer hover:text-sky-300"
+                type="button"
+              >
+                <LucideVideo size={20} />
               </button>
-              <button type="button">
-                <IoMdCall />
+              <button
+                className="cursor-pointer hover:text-sky-300"
+                type="button"
+                disabled={callState !== "idle"}
+                onClick={() => {
+                  startCall(
+                    currentConversation.participants.find(
+                      (p) => p._id !== user._id
+                    )?._id
+                  );
+                }}
+              >
+                <LucidePhone size={18} />
               </button>
             </div>
           </header>
@@ -423,6 +443,10 @@ export default function ChatUI() {
                         message: m,
                       });
                     }}
+                    sender={
+                      currentConversation.title &&
+                      currentConversation?.lastMessage.from
+                    }
                   />
                 </div>
               ))}
@@ -437,7 +461,6 @@ export default function ChatUI() {
                     const ra =
                       (replyMessage as any)?.attachment ||
                       (replyMessage as any)?.attachments;
-                    console.log("attch", ra);
 
                     return ra && ra.length > 0 ? (
                       <div className="flex gap-1 mt-1">
@@ -482,14 +505,17 @@ export default function ChatUI() {
               </div>
               <button
                 className="text-gray-500 text-sm px-2 cursor-pointer"
-                onClick={() => setSelectedMessageId(null)}
+                onClick={() => {
+                  setSelectedMessageId(null);
+                  setSelectedTag(null);
+                }}
               >
                 <LucideX size={14} />
               </button>
             </div>
           )}
           <form
-            className="border-t border-brandSky px-2 flex items-center h-14 bg-white "
+            className="border-t border-sky-300 px-2 flex items-center h-14 bg-white "
             onSubmit={(e) => {
               e.preventDefault();
               if (containerRef.current) {
@@ -511,6 +537,7 @@ export default function ChatUI() {
                   e.stopPropagation();
                   setIsAreaClicked(!isAreaClicked);
                 }}
+                type="button"
               >
                 <LucideSmile size={20} />
               </button>
@@ -537,6 +564,7 @@ export default function ChatUI() {
               className="text-black grow px-2 py-1 h-full outline-none placeholder:text-gray-400"
               placeholder="Type a message"
               value={message || ""}
+              ref={inputRef}
               onChange={(e) => setMessage(e.target.value)}
             />
             <button

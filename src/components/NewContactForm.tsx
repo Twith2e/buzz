@@ -1,11 +1,11 @@
 import { Dialog, DialogContent } from "./ui/dialog";
-import { NewContactSchema, newContactSchema } from "@/schemas/NewContact";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import useSearchEmail from "@/hooks/useSearchEmail";
 import { Loader } from "lucide-react";
-import api from "@/utils/api";
 import { useState } from "react";
+import { NewContactSchema, newContactSchema } from "@/schemas/NewContact";
+import { useUpsertContact } from "@/hooks/useUpsertContact";
+import { useUserContext } from "@/contexts/UserContext";
 
 const NewContactForm = ({
   open,
@@ -14,8 +14,9 @@ const NewContactForm = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const { handleSearch, isSearching, result } = useSearchEmail();
   const [addingContact, setAddingContact] = useState(false);
+
+  const upsert = useUpsertContact();
 
   const {
     register,
@@ -30,21 +31,31 @@ const NewContactForm = ({
     },
   });
 
-  async function onSubmit(data: NewContactSchema): Promise<void> {
+  const { contactList } = useUserContext();
+
+  function onSubmit(data: NewContactSchema) {
     setAddingContact(true);
-    try {
-      const response = await api.post("/users/add-contact", {
-        friendEmail: data.email,
-        localName: `${data.firstName} ${data.lastName}`,
-      });
-      if (response.status === 200) {
-        setOpen(false);
+
+    upsert.mutate(
+      {
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          console.log(contactList);
+        },
+        onSettled: () => {
+          setAddingContact(false); // stop loading spinner
+        },
+        onError: (err) => {
+          console.error(err);
+          setAddingContact(false); // stop spinner even on error
+        },
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setAddingContact(false);
-    }
+    );
   }
 
   return (
@@ -52,40 +63,25 @@ const NewContactForm = ({
       <DialogContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <h2 className="text-3xl mb-3">Add new contact</h2>
-          <div className={`flex flex-col`}>
+          <div className="flex flex-col">
             <div
-              className={`flex gap-2 items-center border rounded-lg border-b-3 px-2  ${
-                errors.email
-                  ? "border-b-red-500"
-                  : result && "border-b-green-300"
+              className={`flex gap-2 items-center border rounded-lg border-b-3 px-2 ${
+                errors.email ? "border-b-red-500" : ""
               }`}
             >
               <input
-                className={`h-10 text-sm outline-none w-full`}
+                className="h-10 text-sm outline-none w-full"
                 placeholder="Enter contact email"
                 type="text"
-                {...register("email", {
-                  onChange: (e) =>
-                    handleSearch((e.target as HTMLInputElement).value),
-                })}
+                {...register("email")}
               />
-              {isSearching && (
-                <Loader
-                  className="animate-spin grow"
-                  size={14}
-                  color="#28282B"
-                />
-              )}
             </div>
-            {errors.email ? (
+            {errors.email && (
               <p className="text-red-500 text-xs">{errors.email.message}</p>
-            ) : (
-              result && (
-                <p className="text-green-500 text-xs">Email exists as a user</p>
-              )
             )}
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-3 mt-3">
             <div className="flex flex-col">
               <label htmlFor="firstName">First name</label>
               <input
@@ -115,6 +111,7 @@ const NewContactForm = ({
               )}
             </div>
           </div>
+
           <div className="flex gap-2 items-center mt-3">
             <button
               className="h-8 px-2 text-sm outline-none w-full bg-sky-500 text-white rounded-md"

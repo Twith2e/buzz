@@ -19,6 +19,7 @@ export default function SidebarButton({
   function handleClick() {
     if (text.toLowerCase() === "story") push("status");
     else if (text.toLowerCase() === "conversations") push("chat");
+    else if (text.toLowerCase() === "settings") push("settings");
   }
 
   return (

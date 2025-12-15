@@ -1,3 +1,4 @@
+import { Contact, Conversation, Participant } from "@/utils/types";
 import { clsx, type ClassValue } from "clsx";
 import { PixelCrop } from "react-image-crop";
 import { twMerge } from "tailwind-merge";
@@ -14,6 +15,28 @@ export function formatTime(time: string): string {
   const date = new Date(time);
   if (Number.isNaN(date.getTime())) return time;
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+export function formatRelativeTime(time: string): string {
+  const date = new Date(time);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return "Just now";
+  }
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+  }
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+  }
+
+  return formatTime(time);
 }
 
 export function makeClientId(): string {
@@ -123,4 +146,14 @@ export function getCroppedBlobFromImage(
   return new Promise((resolve) => {
     canvas.toBlob((b) => resolve(b!), "image/jpeg");
   });
+}
+
+export function computedTitle(
+  conversation: Conversation,
+  userContact: Contact | null,
+  otherUser: Participant | null
+): string {
+  return conversation.title !== ""
+    ? conversation.title
+    : userContact?.localName || otherUser?.email;
 }

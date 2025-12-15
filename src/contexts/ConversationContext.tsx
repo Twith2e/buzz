@@ -57,6 +57,8 @@ type ConversationContextType = {
       currentIndex: number | null;
     }>
   >;
+  currentConversation: Conversation | null;
+  setCurrentConversation: Dispatch<SetStateAction<Conversation | null>>;
 };
 
 const ConversationContext = createContext<ConversationContextType>({
@@ -87,6 +89,8 @@ const ConversationContext = createContext<ConversationContextType>({
     currentIndex: null,
   },
   setSelectedDoc: () => {},
+  currentConversation: null,
+  setCurrentConversation: () => {},
 });
 
 export default function ConversationContextProvider({
@@ -134,6 +138,8 @@ export default function ConversationContextProvider({
     Array<{ _id: string; online: boolean; lastSeen?: string }>
   >([]);
   const [conversationTitle, setConversationTitle] = useState("");
+  const [currentConversation, setCurrentConversation] =
+    useState<Conversation | null>(null);
 
   function createConversation(email: string, id: string) {
     const ids = [user._id, id].sort();
@@ -238,6 +244,8 @@ export default function ConversationContextProvider({
         setSelectedImage,
         selectedDoc,
         setSelectedDoc,
+        currentConversation,
+        setCurrentConversation,
       }}
     >
       {children}
