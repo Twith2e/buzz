@@ -326,7 +326,8 @@ export default function ChatUI() {
                   startCall(
                     currentConversation.participants.find(
                       (p) => p._id !== user._id
-                    )?._id
+                    )?._id,
+                    "audio"
                   );
                 }}
               >

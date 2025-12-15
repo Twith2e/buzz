@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useSocketContext } from "@/contexts/SocketContext";
 import { useUserContext } from "@/contexts/UserContext";
+import { CallType, IncomingCall } from "@/utils/types";
 
 /* ------------------ TYPES ------------------ */
 
@@ -10,9 +11,18 @@ type WebRTCContextType = {
   localStream: MediaStream | null;
   remoteStream: MediaStream | null;
   callState: CallState;
-  startCall: (to: string) => Promise<void>;
-  acceptCall: (offer: RTCSessionDescriptionInit, from: string) => Promise<void>;
+  startCall: (to: string, type: CallType) => Promise<void>;
+  acceptCall: (
+    offer: RTCSessionDescriptionInit,
+    from: string,
+    type: CallType
+  ) => Promise<void>;
   endCall: () => void;
+  rejectCall: () => void;
+  callType: CallType | null;
+  incomingCall: IncomingCall | null;
+  peerId: string | null;
+  showDialog: boolean;
 };
 
 /* ------------------ CONTEXT ------------------ */
@@ -42,16 +52,19 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [callState, setCallState] = useState<CallState>("idle");
+  const [incomingCall, setIncomingCall] = useState<IncomingCall | null>(null);
   const [peerId, setPeerId] = useState<string | null>(null);
+  const [callType, setCallType] = useState<CallType | null>(null);
+  const [showDialog, setShowDialog] = useState(false);
 
   /* ------------------ MEDIA ------------------ */
 
-  async function getMedia() {
+  async function getMedia(type: CallType) {
     if (localStream) return localStream;
 
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
       audio: true,
+      video: type === "video",
     });
 
     setLocalStream(stream);
@@ -101,20 +114,21 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
 
   /* ------------------ CALLER ------------------ */
 
-  async function startCall(to: string) {
+  async function startCall(to: string, type: CallType) {
     setPeerId(to);
     setCallState("calling");
 
-    const stream = await getMedia();
+    const stream = await getMedia(type);
     const pc = createPeerConnection(stream, to);
 
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
 
-    emit("offer", {
+    emit("call:offer", {
       from: user?._id,
       to,
       offer,
+      type,
     });
   }
 
@@ -124,7 +138,9 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
     setPeerId(from);
     setCallState("ringing");
 
-    const stream = await getMedia();
+    if (!callType) return;
+
+    const stream = await getMedia(callType ?? "audio");
     const pc = createPeerConnection(stream, from);
 
     await pc.setRemoteDescription(offer);
@@ -132,40 +148,69 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
 
-    emit("answer", {
+    emit("webrtc:answer", {
       from: user?._id,
       to: from,
       answer,
     });
+
+    setIncomingCall(null);
+    setCallType(null);
+    setCallState("connected");
   }
 
   /* ------------------ SIGNAL HANDLERS ------------------ */
 
   useEffect(() => {
-    const offAnswer = on("answer", async ({ answer }) => {
+    const offIncoming = on("call:incoming", ({ from, type }) => {
+      console.log("incoming: ", from, type);
+
+      setIncomingCall((prev) => prev ?? { from, type, offer: null as any });
+      setCallType(type);
+      setCallState("ringing");
+      setShowDialog(true);
+    });
+
+    const offWebRtcOffer = on("webrtc:offer", async ({ from, offer, type }) => {
+      setIncomingCall((prev) =>
+        prev ? { ...prev, offer } : { from, type, offer }
+      );
+      await pcRef.current?.setRemoteDescription(offer);
+    });
+
+    const offAnswer = on("webrtc:answer", async ({ from, answer }) => {
       await pcRef.current?.setRemoteDescription(answer);
     });
 
-    const offIceCandidate = on("ice-candidate", async ({ candidate }) => {
-      if (candidate) {
-        await pcRef.current?.addIceCandidate(candidate);
+    const offIceCandidate = on(
+      "webrtc:ice-candidate",
+      async ({ from, candidate }) => {
+        if (candidate) {
+          await pcRef.current?.addIceCandidate(candidate);
+        }
       }
-    });
+    );
 
-    const offCallEnd = on("call-end", () => {
+    const offCallEnd = on("call:end", () => {
       endCall();
     });
 
     return () => {
+      offIncoming();
+      offWebRtcOffer();
       offAnswer();
       offIceCandidate();
       offCallEnd();
     };
-  }, []);
+  }, [on, peerId, localStream]);
 
   /* ------------------ CLEANUP ------------------ */
 
   function endCall() {
+    if (peerId) {
+      emit("call-end", { to: peerId });
+    }
+
     pcRef.current?.close();
     pcRef.current = null;
 
@@ -174,7 +219,24 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
     setLocalStream(null);
     setRemoteStream(null);
     setPeerId(null);
+    setCallType(null);
+    setIncomingCall(null);
     setCallState("idle");
+    setShowDialog(false);
+  }
+
+  function rejectCall() {
+    if (!incomingCall) return;
+
+    emit("call:end", {
+      from: user?._id,
+      to: incomingCall.from,
+    });
+
+    setIncomingCall(null);
+    setCallState("idle");
+    setCallType(null);
+    setShowDialog(false);
   }
 
   return (
@@ -186,6 +248,11 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
         startCall,
         acceptCall,
         endCall,
+        rejectCall,
+        callType,
+        incomingCall,
+        peerId,
+        showDialog,
       }}
     >
       {children}

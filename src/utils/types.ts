@@ -227,3 +227,11 @@ export type ThemeChangeSettings = {
   status: true;
   settings: { _id: string };
 };
+
+export type CallType = "audio" | "video";
+
+export type IncomingCall = {
+  from: string;
+  type: CallType;
+  offer: RTCSessionDescriptionInit;
+};

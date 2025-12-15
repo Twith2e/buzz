@@ -11,6 +11,7 @@ export default function useSocket({
   userId: string | null;
 }) {
   const [connected, setConnected] = useState(false);
+  const [socket, setSocket] = useState<any>(null);
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function useSocket({
       reconnectionAttempts: 5,
       reconnectionDelayMax: 5000,
     });
+    setSocket(socketRef.current);
 
     const socket = socketRef.current;
 
@@ -44,8 +46,11 @@ export default function useSocket({
     );
     return () => {
       socket.disconnect();
+      setSocket(null);
     };
   }, [url, token, userId]);
+
+  /* ------------------ HELPERS ------------------ */
 
   const emit = (event: string, payload: any, ack?: (data: any) => void) => {
     if (ack) {
@@ -60,5 +65,5 @@ export default function useSocket({
     return () => socketRef.current?.off(event, handler);
   };
 
-  return { connected, emit, on };
+  return { socket, connected, emit, on };
 }
