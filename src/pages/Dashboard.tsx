@@ -7,6 +7,8 @@ import Sidebar from "@/components/Sidebar";
 import MediaPermissionUI from "@/components/MediaPermissionUI";
 import IncomingCallDialog from "@/components/IncomingCallDialog";
 
+import CallScreen from "@/components/CallScreen";
+
 export default function Dashboard() {
   const { chatAreaRef, setIsAreaClicked, mediaOnboarded } = useUserContext();
   const { setSelectedImage } = useConversationContext();
@@ -17,6 +19,7 @@ export default function Dashboard() {
       <MediaPermissionUI open={!mediaOnboarded} />
 
       <IncomingCallDialog />
+      <CallScreen />
 
       <div className="flex h-screen">
         <Sidebar />

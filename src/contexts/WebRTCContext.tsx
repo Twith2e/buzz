@@ -83,18 +83,22 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Remote stream
-    const remote = new MediaStream();
     pc.ontrack = (event) => {
-      event.streams[0].getTracks().forEach((track) => {
-        remote.addTrack(track);
-      });
-      setRemoteStream(remote);
+      const stream = event.streams[0];
+      if (stream) {
+        console.log("Received remote stream:", stream.id, stream.getTracks());
+        stream.onremovetrack = () => {
+          console.log("Track removed");
+          // Force update if needed? Usually not needed if srcObject is same.
+        };
+        setRemoteStream(stream);
+      }
     };
 
     // ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        emit("ice-candidate", {
+        emit("webrtc:ice-candidate", {
           from: user?._id,
           to,
           candidate: event.candidate,
@@ -104,6 +108,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Connection state
     pc.onconnectionstatechange = () => {
+      console.log("WebRTC Connection State:", pc.connectionState);
       if (pc.connectionState === "connected") {
         setCallState("connected");
       }
@@ -157,21 +162,23 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
     setIncomingCall(null);
     setCallType(null);
     setCallState("connected");
+    setShowDialog(false);
   }
 
   /* ------------------ SIGNAL HANDLERS ------------------ */
 
   useEffect(() => {
-    const offIncoming = on("call:incoming", ({ from, type }) => {
+    const offIncoming = on("call:incoming", ({ from, type, offer }) => {
       console.log("incoming: ", from, type);
 
-      setIncomingCall((prev) => prev ?? { from, type, offer: null as any });
+      setIncomingCall((prev) => prev ?? { from, type, offer });
       setCallType(type);
       setCallState("ringing");
       setShowDialog(true);
     });
 
     const offWebRtcOffer = on("webrtc:offer", async ({ from, offer, type }) => {
+      setCallState("ringing");
       setIncomingCall((prev) =>
         prev ? { ...prev, offer } : { from, type, offer }
       );
@@ -179,6 +186,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     const offAnswer = on("webrtc:answer", async ({ from, answer }) => {
+      setCallState("connected");
       await pcRef.current?.setRemoteDescription(answer);
     });
 
@@ -208,7 +216,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
 
   function endCall() {
     if (peerId) {
-      emit("call-end", { to: peerId });
+      emit("call:end", { to: peerId });
     }
 
     pcRef.current?.close();
