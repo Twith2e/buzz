@@ -1,5 +1,6 @@
 import { LucideCamera, LucidePlus } from "lucide-react";
 import Sidebar from "./Sidebar";
+import BottomBar from "./BottomBar";
 import { useEffect, useState } from "react";
 import StatusMediaPreview from "./StatusMediaPreview";
 import StatusViewer from "./StatusViewer";
@@ -22,6 +23,13 @@ const Status = () => {
   const [viewingStatus, setViewingStatus] = useState<Array<StatusType> | null>(
     null
   );
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -214,8 +222,8 @@ const Status = () => {
         />
       )}
       <div className="flex h-screen bg-white">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
+        {isMobile ? <BottomBar /> : <Sidebar />}
+        <div className={`flex-1 flex flex-col ${isMobile ? "pb-16" : ""}`}>
           <div className="px-6 py-4 flex justify-between items-center bg-gray-50 border-b border-gray-100">
             <h1 className="text-2xl font-bold text-gray-800">Updates</h1>
             <div className="flex gap-4">

@@ -30,7 +30,7 @@ export default function Chats() {
           />
         </div>
       </div>
-      <div className="overflow-scroll h-[calc(100vh-100px)]">
+      <div className="overflow-auto h-[calc(100vh-200px)] lg:h-[calc(100vh-100px)]">
         {conversations &&
           conversations.length > 0 &&
           conversations.map((conversation) => (

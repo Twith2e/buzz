@@ -11,6 +11,7 @@ import type { ChatMessage } from "@/utils/types";
 import useReadObserver from "@/hooks/useReadObserver";
 import { useGetConversations } from "@/services/conversation/conversation";
 import {
+  LucideArrowLeft,
   LucideMic,
   LucidePhone,
   LucideSmile,
@@ -23,6 +24,7 @@ import SelectedFilePreview from "./SelectedFilePreview";
 import { useSendMessage } from "@/hooks/useSendMessage";
 import ConversationTitle from "./ConversationTitle";
 import { useWebRTC } from "@/contexts/WebRTCContext";
+import { useNavigation } from "@/contexts/NavigationContext";
 
 export default function ChatUI() {
   const [openShare, setOpenShare] = useState(false);
@@ -63,6 +65,7 @@ export default function ChatUI() {
     currentConversation,
   } = useConversationContext();
   const { startCall, callState } = useWebRTC();
+  const { back } = useNavigation();
   const { containerRef, registerMessageRef } = useReadObserver({
     emit,
     roomId,
@@ -300,22 +303,30 @@ export default function ChatUI() {
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-2">
-              <span>
-                <ConversationTitle title={conversationTitle} />
-              </span>
-              <span className="text-xs">
-                {isGroup && participantNames.length > 0
-                  ? participantNames.join(", ")
-                  : usersOnline.find((u) => u._id === contact)?.online
-                  ? "Online"
-                  : `Last seen ${formatTime(
-                      usersOnline.find((u) => u._id === contact)?.lastSeen ||
-                        contactList?.find((c) => c.email === email)
-                          ?.contactProfile.lastSeen ||
-                        ""
-                    )}`}
-              </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => back()}
+                className="md:hidden text-foreground"
+              >
+                <LucideArrowLeft size={24} />
+              </button>
+              <div className="flex flex-col gap-2">
+                <span>
+                  <ConversationTitle title={conversationTitle} />
+                </span>
+                <span className="text-xs">
+                  {isGroup && participantNames.length > 0
+                    ? participantNames.join(", ")
+                    : usersOnline.find((u) => u._id === contact)?.online
+                    ? "Online"
+                    : `Last seen ${formatTime(
+                        usersOnline.find((u) => u._id === contact)?.lastSeen ||
+                          contactList?.find((c) => c.email === email)
+                            ?.contactProfile.lastSeen ||
+                          ""
+                      )}`}
+                </span>
+              </div>
             </div>
             <div className="flex flex-row-reverse items-center gap-4 pr-4">
               <button

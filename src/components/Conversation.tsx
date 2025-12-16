@@ -5,6 +5,7 @@ import { Conversation, MessageResponse } from "@/utils/types";
 import { computedTitle, formatTime } from "@/lib/utils";
 import { LucideUser2, LucideUsers } from "lucide-react";
 import LastMessage from "./LastMessage";
+import { useNavigation } from "@/contexts/NavigationContext";
 
 const Convo = ({ conversation }: { conversation: Conversation }) => {
   const { user, contactList, fetchingContactList } = useUserContext();
@@ -14,6 +15,7 @@ const Convo = ({ conversation }: { conversation: Conversation }) => {
     setConversationTitle,
     setCurrentConversation,
   } = useConversationContext();
+  const { push } = useNavigation();
   const otherUser = conversation.participants.find((u) => u._id !== user._id);
   if (fetchingContactList) return null;
   const userContact = contactList.find(
@@ -44,6 +46,7 @@ const Convo = ({ conversation }: { conversation: Conversation }) => {
         enterConversation(conversation._id);
         fetchConvoMessages(conversation._id);
         setCurrentConversation(conversation);
+        push("chat");
       }}
       className="flex items-start w-full px-4 py-2 rounded-lg"
     >

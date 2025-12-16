@@ -1,4 +1,3 @@
-// Settings.tsx
 import { useEffect, useState, useRef } from "react";
 import {
   Loader,
@@ -13,6 +12,7 @@ import Sidebar from "./Sidebar";
 import { useUserContext } from "@/contexts/UserContext";
 import { useThemeContext } from "@/contexts/ThemeContext";
 import Option from "./Options";
+import BottomBar from "./BottomBar";
 
 export default function Settings() {
   const { user, fetchingUser } = useUserContext();
@@ -21,6 +21,13 @@ export default function Settings() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const onLogout = async () => {
     localStorage.removeItem("tapo_accessToken");
@@ -52,9 +59,9 @@ export default function Settings() {
 
   return (
     <div className="flex h-screen bg-white dark:bg-black text-gray-900 dark:text-gray-100">
-      <Sidebar />
-      <div className="flex flex-1">
-        <div className="px-6 py-4 border-r border-gray-200 dark:border-gray-800 w-[300px]">
+      {isMobile ? <BottomBar /> : <Sidebar />}
+      <div className={`flex flex-1 ${isMobile ? "pb-16" : ""}`}>
+        <div className="px-6 py-4 border-r border-gray-200 dark:border-gray-800 w-full lg:w-[300px]">
           <h1 className="text-2xl font-semibold mb-3">Settings</h1>
 
           {fetchingUser && (
@@ -90,7 +97,7 @@ export default function Settings() {
             <label className="block text-xs text-gray-500 dark:text-gray-400 mb-2">
               Appearance
             </label>
-            <div className="flex flex-col justify-between h-[calc(100vh-220px)]">
+            <div className="flex flex-col justify-between h-[calc(100vh-280px)] lg:h-[calc(100vh-220px)]">
               {/* Theme button / menu */}
               <div className="relative inline-block w-full">
                 <button
@@ -164,7 +171,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-black/20">
+        <div className="flex-1 lg:flex flex-col items-center justify-center gap-3 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-black/20 hidden ">
           <LucideSettings size={50} />
           <span className="text-4xl">Settings</span>
           <p className="text-center max-w-lg text-gray-500 dark:text-gray-500">
