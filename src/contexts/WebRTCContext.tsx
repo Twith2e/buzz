@@ -56,6 +56,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
   const [peerId, setPeerId] = useState<string | null>(null);
   const [callType, setCallType] = useState<CallType | null>(null);
   const [showDialog, setShowDialog] = useState(false);
+  const candidatesQueue = useRef<RTCIceCandidateInit[]>([]);
 
   /* ------------------ MEDIA ------------------ */
 
@@ -94,6 +95,21 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   /* ------------------ PEER CONNECTION ------------------ */
+
+  async function processCandidateQueue() {
+    if (!pcRef.current || !pcRef.current.remoteDescription) return;
+
+    while (candidatesQueue.current.length > 0) {
+      const candidate = candidatesQueue.current.shift();
+      if (candidate) {
+        try {
+          await pcRef.current.addIceCandidate(candidate);
+        } catch (error) {
+          console.error("Error adding buffered candidate:", error);
+        }
+      }
+    }
+  }
 
   function createPeerConnection(stream: MediaStream, to: string) {
     const pc = new RTCPeerConnection(ICE_CONFIG);
@@ -198,6 +214,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
       const pc = createPeerConnection(stream, from);
 
       await pc.setRemoteDescription(offer);
+      await processCandidateQueue();
 
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -234,19 +251,34 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
       setIncomingCall((prev) =>
         prev ? { ...prev, offer } : { from, type, offer }
       );
-      await pcRef.current?.setRemoteDescription(offer);
+      if (pcRef.current) {
+        await pcRef.current.setRemoteDescription(offer);
+        await processCandidateQueue();
+      }
     });
 
     const offAnswer = on("webrtc:answer", async ({ from, answer }) => {
       setCallState("connected");
-      await pcRef.current?.setRemoteDescription(answer);
+      if (pcRef.current) {
+        await pcRef.current.setRemoteDescription(answer);
+        await processCandidateQueue();
+      }
     });
 
     const offIceCandidate = on(
       "webrtc:ice-candidate",
       async ({ from, candidate }) => {
         if (candidate) {
-          await pcRef.current?.addIceCandidate(candidate);
+          if (pcRef.current && pcRef.current.remoteDescription) {
+            try {
+              await pcRef.current.addIceCandidate(candidate);
+            } catch (error) {
+              console.error("Error adding candidate:", error);
+            }
+          } else {
+            console.log("Buffering ICE candidate");
+            candidatesQueue.current.push(candidate);
+          }
         }
       }
     );
@@ -273,6 +305,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
 
     pcRef.current?.close();
     pcRef.current = null;
+    candidatesQueue.current = []; // Clear buffered candidates
 
     localStream?.getTracks().forEach((track) => track.stop());
 
