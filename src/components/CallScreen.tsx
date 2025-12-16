@@ -10,6 +10,14 @@ export default function CallScreen() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
+  function muteMic() {
+    localStream.getAudioTracks().forEach((track) => (track.enabled = false));
+  }
+
+  function unmuteMic() {
+    localStream.getAudioTracks().forEach((track) => (track.enabled = true));
+  }
+
   useEffect(() => {
     if (localVideoRef.current && localStream) {
       localVideoRef.current.srcObject = localStream;
@@ -53,7 +61,7 @@ export default function CallScreen() {
         ) : (
           <div className="flex flex-col items-center gap-4">
             <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-3xl font-semibold">
-              {peerId?.slice(0, 2).toUpperCase()}
+              {peerId?.slice(0, 3).toUpperCase()}
             </div>
             <div className="text-xl">
               {callState === "connected" ? "Connected" : "Calling..."}
@@ -91,8 +99,13 @@ export default function CallScreen() {
           variant="ghost"
           size="icon"
           className="rounded-full hover:bg-gray-700 text-white"
+          onClick={localVideoRef.current?.muted ? muteMic : unmuteMic}
         >
-          <Mic className="h-6 w-6" />
+          {localVideoRef.current?.muted ? (
+            <MicOff className="h-6 w-6" />
+          ) : (
+            <Mic className="h-6 w-6" />
+          )}
         </Button>
 
         {callType === "video" && (

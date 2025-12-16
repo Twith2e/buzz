@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { HiOutlineMenu } from "react-icons/hi";
 import SidebarButton from "./SidebarButton";
 import { buttonInfos } from "@/data/ButtonInfos";
+import { LucideMenu } from "lucide-react";
 
 const Sidebar = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
     <aside
-      className={`border-r py-3 border-brandSky bg-slate-200 transition-[width, position] duration-700 ease-in-out overflow-hidden flex flex-col justify-between ${
+      className={`border-r py-3 border-brandSky bg-background transition-[width, position] duration-700 ease-in-out overflow-hidden flex flex-col justify-between ${
         expanded
-          ? "w-60 absolute left-0 bg-slate-200 h-screen top-0 z-10"
+          ? "w-60 absolute left-0 bg-background h-screen top-0 z-10"
           : "w-14"
       }`}
     >
@@ -21,7 +21,7 @@ const Sidebar = () => {
           title={expanded ? "Collapse" : "Expand"}
           className="flex justify-center items-center mb-4 px-3"
         >
-          <HiOutlineMenu size={25} color="black" />
+          <LucideMenu size={25} />
         </button>
 
         {buttonInfos.slice(0, 3).map(({ id, icon, text }) => (
@@ -30,7 +30,7 @@ const Sidebar = () => {
             icon={icon}
             text={text}
             expanded={expanded}
-            color="gray"
+            color="foreground"
             id={id}
           />
         ))}

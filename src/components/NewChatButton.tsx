@@ -48,8 +48,8 @@ const NewChatButton = () => {
             <LucidePlus size={24} />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-80 px-5 pb-5 pt-0 space-y-5 max-h-96 relative bg-white">
-          <DropdownMenuGroup className="sticky top-0 left-0 bg-white z-50 pt-3 w-full">
+        <DropdownMenuContent className="w-80 px-5 pb-5 pt-0 space-y-5 max-h-96 relative bg-background">
+          <DropdownMenuGroup className="sticky top-0 left-0 bg-background z-50 pt-3 w-full">
             <DropdownMenuLabel>New Chat</DropdownMenuLabel>
             <div className="border-b-2 border-b-sky-300 rounded-md border w-full">
               <input

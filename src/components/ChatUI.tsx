@@ -10,7 +10,13 @@ import { formatAttachments, formatTime } from "@/lib/utils";
 import type { ChatMessage } from "@/utils/types";
 import useReadObserver from "@/hooks/useReadObserver";
 import { useGetConversations } from "@/services/conversation/conversation";
-import { LucidePhone, LucideSmile, LucideVideo, LucideX } from "lucide-react";
+import {
+  LucideMic,
+  LucidePhone,
+  LucideSmile,
+  LucideVideo,
+  LucideX,
+} from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import FileModal from "./FileModal";
 import SelectedFilePreview from "./SelectedFilePreview";
@@ -315,6 +321,14 @@ export default function ChatUI() {
               <button
                 className="cursor-pointer hover:text-sky-300"
                 type="button"
+                onClick={() => {
+                  startCall(
+                    currentConversation.participants.find(
+                      (p) => p._id !== user._id
+                    )?._id,
+                    "video"
+                  );
+                }}
               >
                 <LucideVideo size={20} />
               </button>
@@ -516,7 +530,7 @@ export default function ChatUI() {
             </div>
           )}
           <form
-            className="border-t border-sky-300 px-2 flex items-center h-14 bg-white "
+            className="border-t border-sky-300 px-4 flex items-center h-14 bg-background"
             onSubmit={(e) => {
               e.preventDefault();
               if (containerRef.current) {
@@ -562,19 +576,25 @@ export default function ChatUI() {
             </div>
             <input
               type="text"
-              className="text-black grow px-2 py-1 h-full outline-none placeholder:text-gray-400"
+              className="text-foreground grow px-2 py-1 h-full outline-none placeholder:text-gray-400"
               placeholder="Type a message"
               value={message || ""}
               ref={inputRef}
               onChange={(e) => setMessage(e.target.value)}
             />
-            <button
-              aria-label="send message button"
-              className="ml-2"
-              disabled={!initialized || !connected}
-            >
-              <LuSendHorizontal size={24} />
-            </button>
+            {message ? (
+              <button
+                aria-label="send message button"
+                className="ml-2"
+                disabled={!initialized || !connected}
+              >
+                <LuSendHorizontal size={24} />
+              </button>
+            ) : (
+              <button>
+                <LucideMic />
+              </button>
+            )}
           </form>
         </>
       ) : (

@@ -221,6 +221,22 @@ export type StatusResponse = {
   visible: Array<VisibleStatus>;
 };
 
+export type Settings = {
+  _id: string;
+  userId: string;
+  __v: number;
+  createdAt: string;
+  language: string;
+  notification: boolean;
+  theme: Theme;
+  updatedAt: string;
+};
+
+export type SettingsResponse = {
+  status: true;
+  settings: Settings;
+};
+
 export type Theme = "system" | "light" | "dark";
 
 export type ThemeChangeSettings = {

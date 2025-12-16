@@ -9,8 +9,7 @@ import { Phone, PhoneOff } from "lucide-react";
 import { useWebRTC } from "@/contexts/WebRTCContext";
 
 const IncomingCallDialog = () => {
-  const { showDialog, incomingCall, peerId, acceptCall, rejectCall } =
-    useWebRTC();
+  const { showDialog, incomingCall, acceptCall, rejectCall } = useWebRTC();
 
   const isOpen = showDialog;
 

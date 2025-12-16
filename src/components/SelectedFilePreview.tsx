@@ -402,6 +402,7 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
               e.stopPropagation();
               setIsAreaClicked(!isAreaClicked);
             }}
+            type="button"
           >
             <LucideSmile size={20} color="black" />
           </button>

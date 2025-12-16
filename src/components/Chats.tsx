@@ -18,14 +18,14 @@ export default function Chats() {
         </div>
       </div>
       <div
-        className="border flex items-center px-3 bg-[#0f1a2b] rounded-xl mx-1 my-3"
+        className="border flex items-center px-3 bg-background rounded-xl mx-1 my-3"
         role="search"
       >
         <CiSearch size={20} color="white" />
         <input
           type="text"
           placeholder="Search or start a new chat"
-          className="p-2 w-full outline-none bg-[#0f1a2b] text-white"
+          className="p-2 w-full outline-none bg-background text-foreground"
         />
       </div>
       {conversations &&
@@ -33,7 +33,7 @@ export default function Chats() {
         conversations.map((conversation) => (
           <button
             key={conversation._id}
-            className="flex items-center gap-3 font-sans text-black w-full my-1 hover:bg-gray-100 p-2 rounded-md"
+            className="flex items-center gap-3 font-sans text-black w-full my-1 hover:bg-gray-100 hover:dark:bg-gray-800 p-2 rounded-md"
           >
             <Convo conversation={conversation} />
           </button>

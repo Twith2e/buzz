@@ -29,8 +29,8 @@ export default function SidebarButton({
       className="flex items-center hover:bg-gray-400 w-full px-3 py-[.7rem] transition-all duration-300"
       title={text}
     >
-      <span className="shrink-0">
-        <Icon color={color} size={24} />
+      <span className={`shrink-0 text-${color}`}>
+        <Icon size={24} />
       </span>
 
       <div

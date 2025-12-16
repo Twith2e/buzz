@@ -62,13 +62,35 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
   async function getMedia(type: CallType) {
     if (localStream) return localStream;
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: type === "video",
-    });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: type === "video",
+      });
 
-    setLocalStream(stream);
-    return stream;
+      setLocalStream(stream);
+      return stream;
+    } catch (error) {
+      console.error("Detailed getMedia error:", error);
+
+      // Fallback to audio only if video fails
+      if (type === "video") {
+        console.warn("Video failed, falling back to audio only");
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: false,
+          });
+          setLocalStream(stream);
+          setCallType("audio"); // Update state to reflect fallback
+          return stream;
+        } catch (fallbackError) {
+          console.error("Audio fallback also failed:", fallbackError);
+          throw fallbackError;
+        }
+      }
+      throw error;
+    }
   }
 
   /* ------------------ PEER CONNECTION ------------------ */
@@ -120,49 +142,79 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
   /* ------------------ CALLER ------------------ */
 
   async function startCall(to: string, type: CallType) {
-    setPeerId(to);
-    setCallState("calling");
+    try {
+      setPeerId(to);
+      setCallState("calling");
+      setCallType(type); // Ensure type is set initially
 
-    const stream = await getMedia(type);
-    const pc = createPeerConnection(stream, to);
+      const stream = await getMedia(type);
 
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
+      // Verify actual stream type in case of fallback
+      const hasVideo = stream.getVideoTracks().length > 0;
+      const actualType: CallType = hasVideo ? "video" : "audio";
 
-    emit("call:offer", {
-      from: user?._id,
-      to,
-      offer,
-      type,
-    });
+      if (actualType !== type) {
+        setCallType(actualType);
+      }
+
+      const pc = createPeerConnection(stream, to);
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      emit("call:offer", {
+        from: user?._id,
+        to,
+        offer,
+        type: actualType,
+      });
+    } catch (error) {
+      console.error("Failed to start call:", error);
+      endCall();
+    }
   }
 
   /* ------------------ RECEIVER ------------------ */
 
-  async function acceptCall(offer: RTCSessionDescriptionInit, from: string) {
-    setPeerId(from);
-    setCallState("ringing");
+  async function acceptCall(
+    offer: RTCSessionDescriptionInit,
+    from: string,
+    type: CallType
+  ) {
+    try {
+      setPeerId(from);
+      setCallType(type);
 
-    if (!callType) return;
+      const stream = await getMedia(type ?? "audio");
 
-    const stream = await getMedia(callType ?? "audio");
-    const pc = createPeerConnection(stream, from);
+      // Verify actual stream type in case of fallback
+      const hasVideo = stream.getVideoTracks().length > 0;
+      const actualType: CallType = hasVideo ? "video" : "audio";
 
-    await pc.setRemoteDescription(offer);
+      if (actualType !== type) {
+        setCallType(actualType);
+      }
 
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
+      const pc = createPeerConnection(stream, from);
 
-    emit("webrtc:answer", {
-      from: user?._id,
-      to: from,
-      answer,
-    });
+      await pc.setRemoteDescription(offer);
 
-    setIncomingCall(null);
-    setCallType(null);
-    setCallState("connected");
-    setShowDialog(false);
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      emit("webrtc:answer", {
+        from: user?._id,
+        to: from,
+        answer,
+      });
+
+      setIncomingCall(null);
+      setCallState("connected");
+      setShowDialog(false);
+    } catch (error) {
+      console.error("Failed to accept call:", error);
+      endCall();
+    }
   }
 
   /* ------------------ SIGNAL HANDLERS ------------------ */

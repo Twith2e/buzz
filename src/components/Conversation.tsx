@@ -48,7 +48,7 @@ const Convo = ({ conversation }: { conversation: Conversation }) => {
       className="flex items-start w-full px-4 py-2 rounded-lg"
     >
       <div className="flex items-center gap-3 w-[95%]">
-        <div className="h-14 w-14 rounded-full bg-[#EEE] border shadow-sm p-1 shrink-0 flex items-center justify-center">
+        <div className="h-14 w-14 rounded-full bg-sky-300 text-white border shadow-sm p-1 shrink-0 flex items-center justify-center">
           {conversation.participants.length === 2 ? (
             <LucideUser2 size={20} />
           ) : (
@@ -56,10 +56,10 @@ const Convo = ({ conversation }: { conversation: Conversation }) => {
           )}
         </div>
         <div className="flex flex-col gap-1 items-start w-full">
-          <span className="max-w-[80%] truncate">
+          <span className="max-w-[80%] truncate text-foreground">
             {computedTitle(conversation, userContact, otherUser)}
           </span>
-          <span className="text-xs text-[#AAA] truncate max-w-[90%]">
+          <span className="text-xs truncate max-w-[90%] text-foreground">
             {conversation.lastMessage ? (
               conversation.lastMessage.attachments &&
               conversation.lastMessage.attachments.length > 0 ? (
@@ -75,7 +75,7 @@ const Convo = ({ conversation }: { conversation: Conversation }) => {
           </span>
         </div>
       </div>
-      <span className="text-xs whitespace-nowrap flex-1">
+      <span className="text-xs whitespace-nowrap flex-1 text-foreground">
         {formatTime(
           conversation.lastMessage
             ? conversation.lastMessage.ts

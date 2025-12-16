@@ -7,6 +7,7 @@ import {
 } from "react";
 import { THEME_KEY } from "@/data/data";
 import { Theme } from "@/utils/types";
+import { useGetSettings } from "@/services/settings/settings";
 
 type ThemeContextType = {
   theme: Theme;
@@ -28,6 +29,8 @@ export function useThemeContext() {
 }
 
 export function ThemeContextProvider({ children }: { children: ReactNode }) {
+  const { data: settings } = useGetSettings();
+
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") return "system";
     try {
@@ -37,6 +40,12 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
       return "system";
     }
   });
+
+  useEffect(() => {
+    if (settings?.settings.theme) {
+      setTheme(settings.settings.theme);
+    }
+  }, [settings]);
 
   const [updatingSettings, setUpdatingSettings] = useState(false);
 

@@ -62,7 +62,7 @@ const FileModal = ({
           <label
             htmlFor="media-upload"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2 hover:bg-slate-200 p-2 rounded-sm"
+            className="flex items-center gap-2 hover:bg-background text-foreground p-2 rounded-sm"
           >
             <LucideCamera size={16} />
             <span>Photo & Video</span>
@@ -79,7 +79,7 @@ const FileModal = ({
           <label
             htmlFor="file-upload"
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-2 hover:bg-slate-200 p-2 rounded-sm w-full"
+            className="flex items-center gap-2 hover:bg-background text-foreground p-2 rounded-sm w-full"
           >
             <LucideFile size={16} />
             <span>Document</span>
