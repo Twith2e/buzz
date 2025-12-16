@@ -7,7 +7,7 @@ import { useConversationContext } from "@/contexts/ConversationContext";
 export default function Chats() {
   const { conversations } = useConversationContext();
   return (
-    <div className="py-3 px-2 relative h-screen">
+    <div className="py-3 px-2 relative h-screen overflow-auto">
       <div className="flex items-center justify-between">
         <span className="font-rubik px-1 text-2xl">Messages</span>
         <div className="flex gap-3">
