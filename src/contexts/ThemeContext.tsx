@@ -42,8 +42,8 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    if (settings?.settings.theme) {
-      setTheme(settings?.settings.theme);
+    if (settings?.settings?.theme) {
+      setTheme(settings?.settings?.theme);
     }
   }, [settings]);
 
