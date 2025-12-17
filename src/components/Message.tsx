@@ -1,4 +1,5 @@
 import { formatTime } from "@/lib/utils";
+import ImageAttachment from "@/components/ImageAttachment";
 import {
   LucideCheck,
   LucideCheckCheck,
@@ -146,25 +147,23 @@ const Message = ({
               (a: Message["attachments"][number], i: number) => {
                 const url: string = a.url;
                 const fmt: string | undefined = a.format;
-                const t: string | undefined =
-                  a.format ||
-                  (fmt
-                    ? /^(jpg|jpeg|png|gif|webp)$/i.test(fmt)
-                      ? "image"
-                      : /^(mp4|webm|ogg)$/i.test(fmt)
-                      ? "video"
-                      : "doc"
-                    : /\.(jpg|jpeg|png|gif|webp)(\?|#|$)/i.test(url)
+                const t: string | undefined = fmt
+                  ? /^(jpg|jpeg|png|gif|webp)$/i.test(fmt)
                     ? "image"
-                    : /\.(mp4|webm|ogg)(\?|#|$)/i.test(url)
+                    : /^(mp4|webm|ogg)$/i.test(fmt)
                     ? "video"
-                    : "doc");
+                    : "doc"
+                  : /\.(jpg|jpeg|png|gif|webp)(\?|#|$)/i.test(url)
+                  ? "image"
+                  : /\.(mp4|webm|ogg)(\?|#|$)/i.test(url)
+                  ? "video"
+                  : "doc";
 
                 return (
                   <div key={i} className="">
                     {t === "image" ? (
-                      <img
-                        src={url}
+                      <ImageAttachment
+                        url={url}
                         alt={a.fileName || "attachment"}
                         className="max-w-[280px] max-h-[300px] w-auto h-auto rounded-lg object-contain bg-black/5"
                       />
