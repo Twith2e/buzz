@@ -63,6 +63,7 @@ export default function ChatUI() {
     selectedImage,
     selectedDoc,
     currentConversation,
+    setConversations,
   } = useConversationContext();
   const { startCall, callState } = useWebRTC();
   const { back } = useNavigation();
@@ -186,6 +187,7 @@ export default function ChatUI() {
     selectedTag,
     sentMessages,
     setSentMessages,
+    setConversations,
   });
 
   useEffect(() => {
@@ -556,7 +558,7 @@ export default function ChatUI() {
               setSelectedTag(null);
             }}
           >
-            <div className="flex items-center gap-5 pr-5">
+            <div className="flex items-center gap-5 pr-5 bg-red-500">
               <button
                 className={`p-1 rounded-md cursor-pointer hover:bg-sky-300 hover:text-white grow-0`}
                 onClick={(e) => {

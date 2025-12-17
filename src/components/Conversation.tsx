@@ -7,7 +7,13 @@ import { LucideUser2, LucideUsers } from "lucide-react";
 import LastMessage from "./LastMessage";
 import { useNavigation } from "@/contexts/NavigationContext";
 
-const Convo = ({ conversation }: { conversation: Conversation }) => {
+const Convo = ({
+  conversation,
+  isLoading,
+}: {
+  conversation?: Conversation;
+  isLoading: boolean;
+}) => {
   const { user, contactList, fetchingContactList } = useUserContext();
   const {
     enterConversation,
@@ -16,9 +22,27 @@ const Convo = ({ conversation }: { conversation: Conversation }) => {
     setCurrentConversation,
   } = useConversationContext();
   const { push } = useNavigation();
-  const otherUser = conversation.participants.find((u) => u._id !== user._id);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center w-full px-4 py-2 gap-3 animate-pulse">
+        <div className="h-14 w-14 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0" />
+        <div className="flex flex-col gap-2 w-full overflow-hidden">
+          <div className="flex justify-between items-center w-full">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 w-1/3 rounded" />
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 w-10 rounded" />
+          </div>
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 w-3/4 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!conversation) return null;
+
+  const otherUser = conversation.participants.find((u) => u._id !== user?._id);
   if (fetchingContactList) return null;
-  const userContact = contactList.find(
+  const userContact = contactList?.find(
     (u) => u.contactProfile?._id === otherUser?._id
   );
 

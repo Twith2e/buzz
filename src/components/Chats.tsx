@@ -5,7 +5,7 @@ import Convo from "./Conversation";
 import { useConversationContext } from "@/contexts/ConversationContext";
 
 export default function Chats() {
-  const { conversations } = useConversationContext();
+  const { conversations, isLoading } = useConversationContext();
   return (
     <div className="py-3 px-2 relative h-screen">
       <div className="sticky">
@@ -31,16 +31,27 @@ export default function Chats() {
         </div>
       </div>
       <div className="overflow-auto h-[calc(100vh-200px)] lg:h-[calc(100vh-100px)]">
-        {conversations &&
-          conversations.length > 0 &&
-          conversations.map((conversation) => (
-            <button
-              key={conversation._id}
-              className="flex items-center gap-3 font-sans text-black w-full my-1 hover:bg-gray-100 hover:dark:bg-gray-800 p-2 rounded-md"
-            >
-              <Convo conversation={conversation} />
-            </button>
-          ))}
+        <div className="overflow-auto h-[calc(100vh-200px)] lg:h-[calc(100vh-100px)]">
+          {isLoading
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 font-sans text-black w-full my-1 hover:bg-gray-100 hover:dark:bg-gray-800 p-2 rounded-md"
+                >
+                  <Convo isLoading={true} />
+                </div>
+              ))
+            : conversations &&
+              conversations.length > 0 &&
+              conversations.map((conversation) => (
+                <button
+                  key={conversation._id}
+                  className="flex items-center gap-3 font-sans text-black w-full my-1 hover:bg-gray-100 hover:dark:bg-gray-800 p-2 rounded-md"
+                >
+                  <Convo conversation={conversation} isLoading={false} />
+                </button>
+              ))}
+        </div>
       </div>
     </div>
   );

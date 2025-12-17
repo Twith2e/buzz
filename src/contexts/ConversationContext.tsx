@@ -34,6 +34,7 @@ type ConversationContextType = {
   conversationTitle: string;
   setConversationTitle: (title: string) => void;
   conversations: Conversation[] | null;
+  isLoading: boolean;
   setConversations: Dispatch<SetStateAction<Conversation[] | null>>;
   selectedMessageId: string | null;
   setSelectedMessageId: Dispatch<SetStateAction<string | null>>;
@@ -76,6 +77,7 @@ const ConversationContext = createContext<ConversationContextType>({
   conversationTitle: "",
   setConversationTitle: () => {},
   conversations: null,
+  isLoading: false,
   setConversations: () => {},
   selectedMessageId: null,
   setSelectedMessageId: () => {},
@@ -98,7 +100,11 @@ export default function ConversationContextProvider({
 }: {
   children: ReactNode;
 }) {
-  const { data: fetchedConversations, refetch } = useGetConversations();
+  const {
+    data: fetchedConversations,
+    isLoading,
+    refetch,
+  } = useGetConversations();
   const [conversations, setConversations] = useState<Conversation[] | null>(
     null
   );
@@ -237,6 +243,7 @@ export default function ConversationContextProvider({
         conversationTitle,
         setConversationTitle,
         conversations,
+        isLoading,
         setConversations,
         selectedMessageId,
         setSelectedMessageId,

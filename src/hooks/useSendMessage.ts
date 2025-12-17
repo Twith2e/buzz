@@ -17,6 +17,7 @@ export function useSendMessage({
   selectedTag,
   sentMessages,
   setSentMessages,
+  setConversations,
 }: {
   emit: (event: string, payload: any, cb: (ack: any) => void) => void;
   roomId: string | null;
@@ -27,6 +28,7 @@ export function useSendMessage({
   selectedTag: any | null;
   sentMessages: ChatMessage[];
   setSentMessages: (updater: (prev: any) => any) => void;
+  setConversations: (updater: (prev: any) => any) => void;
 }) {
   /**
    * Send a message with optional attachments using optimistic UI and ack handling.
@@ -95,6 +97,33 @@ export function useSendMessage({
         setSentMessages((prev: any) => {
           const base = Array.isArray(prev) ? (prev as ChatMessage[]) : [];
           return [...base, optimistic];
+        });
+
+        // Optimistic update for conversation list
+        setConversations((prev: any) => {
+          if (!prev) return prev;
+          const targetIndex = prev.findIndex(
+            (c: any) => c.roomId === roomId || c._id === roomId
+          );
+          if (targetIndex === -1) return prev;
+
+          const updatedConversation = {
+            ...prev[targetIndex],
+            lastMessage: {
+              ...prev[targetIndex].lastMessage,
+              from: userId,
+              message: text || (attachments ? "Attachment" : ""),
+              ts: new Date().toISOString(),
+              status: "sending",
+            },
+            updatedAt: new Date().toISOString(),
+          };
+
+          const newConversations = [...prev];
+          newConversations.splice(targetIndex, 1);
+          newConversations.unshift(updatedConversation);
+
+          return newConversations;
         });
       }
 
