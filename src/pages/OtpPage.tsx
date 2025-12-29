@@ -8,6 +8,7 @@ import { OTPInput } from "input-otp";
 import FakeDash from "../components/FakeDash";
 import Slot from "../components/Slot";
 import api from "@/utils/api";
+import { VerifyOtpResponse } from "@/utils/types";
 
 export default function OtpPage() {
   const [otp, setOtp] = useState("");
@@ -50,14 +51,19 @@ export default function OtpPage() {
   async function onSubmit() {
     setIsLoading(true);
     try {
-      const response = await api.post("/users/verify-otp", {
+      const response = await api.post<VerifyOtpResponse>("/users/verify-otp", {
         otp,
         email: id,
       });
       if (response && response.status === 200) {
         console.log(response);
         setEmail(response.data.email);
-        navigate(`/complete-registration/${response.data.email}`);
+        if (response.data.isNewUser) {
+          navigate(`/complete-registration/${response.data.email}`);
+        } else {
+          localStorage.setItem("tapo_accessToken", response.data.accessToken);
+          navigate(`/dashboard`);
+        }
       }
     } catch (error) {
       console.log(error);

@@ -6,10 +6,18 @@ import { ProfileSchema, profileSchema } from "../schemas/Profile.schema";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../utils/api";
+import {
+  getCloudinarySignature,
+  uploadFileToCloudinary,
+} from "../utils/cloudinary";
 
 export default function Onboard() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
+  const [profilePicPreview, setProfilePicPreview] = useState<string | null>(
+    null
+  );
   const {
     reset,
     register,
@@ -21,13 +29,36 @@ export default function Onboard() {
 
   const { id } = useParams();
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfilePicFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePicPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   async function onSubmit(data: ProfileSchema) {
     setIsLoading(true);
     try {
+      let profilePicUrl = null;
+      if (profilePicFile) {
+        const signData = await getCloudinarySignature("profile-pics");
+        const uploadResponse = await uploadFileToCloudinary(
+          profilePicFile,
+          signData
+        );
+        profilePicUrl = uploadResponse.secure_url;
+      }
+
       console.log(data.displayName);
       const response = await api.post("/users/register", {
         displayName: data.displayName,
         email: id,
+        profilePic: profilePicUrl,
       });
       if (response.status === 200) {
         console.log(response);
@@ -59,16 +90,26 @@ export default function Onboard() {
           >
             <label htmlFor="">Profile Picture</label>
             <label
-              className="border border-gray-400 rounded-full h-40 w-40 flex items-center justify-center"
+              className="border border-gray-400 rounded-full h-40 w-40 flex items-center justify-center cursor-pointer overflow-hidden"
               htmlFor="profile-picture"
             >
-              <BiSolidImageAdd size={50} />
+              {profilePicPreview ? (
+                <img
+                  src={profilePicPreview}
+                  alt="Profile preview"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <BiSolidImageAdd size={50} />
+              )}
             </label>
             <input
               className="hidden"
               type="file"
               name="Profile Picture"
               id="profile-picture"
+              accept="image/*"
+              onChange={handleFileChange}
             />
             <div className="wrapper-custom">
               <label

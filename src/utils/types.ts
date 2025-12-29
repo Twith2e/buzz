@@ -7,6 +7,15 @@ export type FindUserResponse = {
   };
 };
 
+export type VerifyOtpResponse = {
+  message: string;
+  email: string;
+  hashedEmail: string;
+  isNewUser: boolean;
+  accessToken?: string;
+  refreshToken?: string;
+};
+
 export type User = {
   meta: {
     unreadCount: number;

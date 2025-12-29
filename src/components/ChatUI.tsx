@@ -558,7 +558,7 @@ export default function ChatUI() {
               setSelectedTag(null);
             }}
           >
-            <div className="flex items-center gap-5 pr-5 bg-red-500">
+            <div className="flex items-center gap-5 pr-5">
               <button
                 className={`p-1 rounded-md cursor-pointer hover:bg-sky-300 hover:text-white grow-0`}
                 onClick={(e) => {
