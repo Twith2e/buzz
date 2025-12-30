@@ -7,21 +7,30 @@ import {
   LucideMoon,
   LucideMonitor,
   LucideLogOut,
+  LucideCamera,
 } from "lucide-react";
 import Sidebar from "./Sidebar";
 import { useUserContext } from "@/contexts/UserContext";
 import { useThemeContext } from "@/contexts/ThemeContext";
 import Option from "./Options";
 import BottomBar from "./BottomBar";
+import { useUpdateUser } from "@/services/user/user";
+import {
+  getCloudinarySignature,
+  uploadFileToCloudinary,
+} from "@/utils/cloudinary";
 
 export default function Settings() {
   const { user, fetchingUser } = useUserContext();
   const { theme, updatingSettings } = useThemeContext();
+  const updateUserMutation = useUpdateUser();
 
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [updatingProfilePic, setUpdatingProfilePic] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -32,6 +41,30 @@ export default function Settings() {
   const onLogout = async () => {
     localStorage.removeItem("tapo_accessToken");
     window.location.href = "/";
+  };
+
+  const handleProfilePicChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUpdatingProfilePic(true);
+    try {
+      const signData = await getCloudinarySignature("profile-pics");
+      const uploadResponse = await uploadFileToCloudinary(file, signData);
+      await updateUserMutation.mutateAsync({
+        profilePic: uploadResponse.secure_url,
+      });
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+    } finally {
+      setUpdatingProfilePic(false);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   useEffect(() => {
@@ -72,18 +105,39 @@ export default function Settings() {
           )}
 
           {!fetchingUser && user && (
-            <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 py-3">
-              {user.profilePic ? (
-                <img
-                  src={user.profilePic}
-                  alt="profile"
-                  className="w-12 h-12 rounded-full"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center shrink-0">
-                  <LucideUser className="text-white" />
-                </div>
-              )}
+            <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 py-3 relative">
+              <div className="relative">
+                {user.profilePic ? (
+                  <img
+                    src={user.profilePic}
+                    alt="profile"
+                    className="w-12 h-12 rounded-full"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center shrink-0">
+                    <LucideUser className="text-white" />
+                  </div>
+                )}
+                <button
+                  onClick={triggerFileInput}
+                  disabled={updatingProfilePic}
+                  className="absolute -bottom-1 -right-1 bg-blue-500 hover:bg-blue-600 text-white p-1 rounded-full transition disabled:opacity-50"
+                  title="Change profile picture"
+                >
+                  {updatingProfilePic ? (
+                    <Loader className="animate-spin" size={12} />
+                  ) : (
+                    <LucideCamera size={12} />
+                  )}
+                </button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleProfilePicChange}
+                className="hidden"
+              />
               <div className="flex flex-col">
                 <span className="font-medium">{user.displayName}</span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">

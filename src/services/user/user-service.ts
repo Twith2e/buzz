@@ -9,3 +9,15 @@ export async function getUser() {
     throw e;
   }
 }
+
+export async function updateUser(data: {
+  displayName?: string;
+  profilePic?: string;
+}) {
+  try {
+    const response = await api.put<UserResponse>("/users/update-profile", data);
+    return response.data.user;
+  } catch (e) {
+    throw e;
+  }
+}
