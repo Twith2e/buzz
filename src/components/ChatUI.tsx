@@ -558,7 +558,7 @@ export default function ChatUI() {
               setSelectedTag(null);
             }}
           >
-            <div className="flex items-center gap-5 pr-5 bg-red-500">
+            <div className="flex items-center gap-5 pr-5">
               <button
                 className={`p-1 rounded-md cursor-pointer hover:bg-sky-300 hover:text-white grow-0`}
                 onClick={(e) => {
@@ -573,11 +573,12 @@ export default function ChatUI() {
                 ref={emojiRef}
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
-                className={`-bottom-[145px] fixed transition-transform duration-500 ease-in-out ${
+                className={`-bottom-[145px] fixed transition-transform duration-500 ease-in-out bg-background z-50 ${
                   isAreaClicked ? "translate-y-100" : "-translate-y-50"
                 }`}
               >
                 <EmojiPicker
+                  className="bg-background"
                   autoFocusSearch
                   lazyLoadEmojis={true}
                   onEmojiClick={(e) => {

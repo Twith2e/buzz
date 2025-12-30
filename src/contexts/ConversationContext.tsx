@@ -151,6 +151,7 @@ export default function ConversationContextProvider({
     const ids = [user._id, id].sort();
     const localRoomId = `direct:${ids[0]}:${ids[1]}`;
     setEmail(email);
+    setConversationTitle(email);
     setContact(id);
     setRoomId(localRoomId);
     setInitialized(true);

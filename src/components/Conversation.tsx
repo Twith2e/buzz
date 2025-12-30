@@ -65,7 +65,9 @@ const Convo = ({
       tabIndex={0}
       onClick={() => {
         setConversationTitle(
-          computedTitle(conversation, userContact, otherUser)
+          otherUser
+            ? computedTitle(conversation, userContact, otherUser)
+            : otherUser?.email
         );
         enterConversation(conversation._id);
         fetchConvoMessages(conversation._id);
@@ -84,7 +86,9 @@ const Convo = ({
         </div>
         <div className="flex flex-col gap-1 items-start w-full">
           <span className="max-w-[80%] truncate text-foreground">
-            {computedTitle(conversation, userContact, otherUser)}
+            {otherUser
+              ? computedTitle(conversation, userContact, otherUser)
+              : otherUser?.email}
           </span>
           <span className="text-xs truncate max-w-[90%] text-foreground">
             {conversation.lastMessage ? (
