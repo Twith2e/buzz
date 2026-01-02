@@ -63,6 +63,7 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
     setSelectedMessageId,
     sentMessages,
     setSentMessages,
+    setConversations,
   } = useConversationContext();
   const { sendMessage } = useSendMessage({
     emit,
@@ -74,6 +75,7 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
     selectedTag,
     sentMessages,
     setSentMessages,
+    setConversations,
   });
   const { containerRef } = useReadObserver({ emit, userId: user?._id, roomId });
   const idx =
