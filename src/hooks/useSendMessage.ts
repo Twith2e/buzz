@@ -153,6 +153,8 @@ export function useSendMessage({
       }, 10000);
 
       emit("send-message", payload, (ack: any) => {
+        console.log("message emitted");
+
         ackHandled = true;
         clearTimeout(ackTimeout);
 

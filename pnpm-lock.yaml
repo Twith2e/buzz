@@ -135,6 +135,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.21(postcss@8.5.6)
+      baseline-browser-mapping:
+        specifier: ^2.9.11
+        version: 2.9.11
       eslint:
         specifier: ^9.17.0
         version: 9.38.0(jiti@2.6.1)
@@ -2186,8 +2189,8 @@ packages:
   bare-url@2.3.2:
     resolution: {integrity: sha512-ZMq4gd9ngV5aTMa5p9+UfY0b3skwhHELaDkhEHetMdX0LRkW9kzaym4oo/Eh+Ghm0CCDuMTsRIGM/ytUc1ZYmw==}
 
-  baseline-browser-mapping@2.8.18:
-    resolution: {integrity: sha512-UYmTpOBwgPScZpS4A+YbapwWuBwasxvO/2IOHArSsAhL/+ZdmATBXTex3t+l2hXwLVYK382ibr/nKoY9GKe86w==}
+  baseline-browser-mapping@2.9.11:
+    resolution: {integrity: sha512-Sg0xJUNDU1sJNGdfGWhVHX0kkZ+HWcvmVymJbj6NSgZZmW/8S9Y2HQ5euytnIgakgxN6papOAWiwDo1ctFDcoQ==}
     hasBin: true
 
   baseline-browser-mapping@2.9.8:
@@ -6614,7 +6617,7 @@ snapshots:
       bare-path: 3.0.0
     optional: true
 
-  baseline-browser-mapping@2.8.18: {}
+  baseline-browser-mapping@2.9.11: {}
 
   baseline-browser-mapping@2.9.8: {}
 
@@ -6654,7 +6657,7 @@ snapshots:
 
   browserslist@4.26.3:
     dependencies:
-      baseline-browser-mapping: 2.8.18
+      baseline-browser-mapping: 2.9.11
       caniuse-lite: 1.0.30001751
       electron-to-chromium: 1.5.237
       node-releases: 2.0.25

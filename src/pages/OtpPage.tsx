@@ -15,6 +15,7 @@ export default function OtpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(30);
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const {
     reset,
@@ -49,6 +50,7 @@ export default function OtpPage() {
   }, [cooldown]);
 
   async function onSubmit() {
+    setError("");
     setIsLoading(true);
     try {
       const response = await api.post<VerifyOtpResponse>("/users/verify-otp", {
@@ -57,7 +59,7 @@ export default function OtpPage() {
       });
       if (response && response.status === 200) {
         console.log(response);
-        setEmail(response.data.email);
+        setEmail(response.data.hashedEmail);
         if (response.data.isNewUser) {
           navigate(`/complete-registration/${response.data.email}`);
         } else {
@@ -65,7 +67,10 @@ export default function OtpPage() {
           navigate(`/dashboard`);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
+      const errorMessage =
+        error?.response?.data?.message || "Invalid OTP. Please try again.";
+      setError(errorMessage);
       console.log(error);
     } finally {
       reset();
@@ -78,46 +83,65 @@ export default function OtpPage() {
       <div className="hidden md:flex w-1/2 bg-[#33BEE7] justify-center items-center">
         <h1 className="font-bold text-4xl text-white font-rubik">JOIN US</h1>
       </div>
-      <div className="md:w-1/2 flex flex-col justify-center items-center py-6 lg:py-0">
+      <div className="md:w-1/2 flex flex-col justify-center items-center py-6 lg:py-0 px-4">
         <div className="w-full max-w-md flex flex-col justify-center items-center">
           <h2 className="text-xl lg:text-2xl font-bold mb-6 text-gray-800 font-rubik">
             ENTER VERIFICATION CODE
           </h2>
-          <p className="text-center text-xs mb-3">
+          <p className="text-center text-xs mb-6 text-gray-600">
             Kindly input the 6-digit OTP has been sent to <br />
-            <span className="text-gray-500">{email && email}</span>
+            <span className="text-gray-700 font-medium">
+              {email || (id && `${id.substring(0, 5)}...`)}
+            </span>
           </p>
-          <OTPInput
-            maxLength={6}
-            value={otp}
-            onChange={setOtp}
-            onComplete={onSubmit}
-            containerClassName="group flex items-center"
-            render={({ slots }) => (
-              <>
-                <div className="flex">
-                  {slots.slice(0, 3).map((slot, idx) => (
-                    <Slot key={idx} {...slot} />
-                  ))}
-                </div>
 
-                <FakeDash />
+          <div
+            className={`w-full flex flex-col items-center p-4 rounded-lg border-2 transition-colors ${
+              error ? "border-red-500 bg-white" : "border-gray-200 bg-white"
+            }`}
+          >
+            <OTPInput
+              maxLength={6}
+              value={otp}
+              onChange={(value) => {
+                setOtp(value);
+                setError("");
+              }}
+              onComplete={onSubmit}
+              containerClassName="group flex items-center"
+              render={({ slots }) => (
+                <>
+                  <div className="flex">
+                    {slots.slice(0, 3).map((slot, idx) => (
+                      <Slot key={idx} {...slot} />
+                    ))}
+                  </div>
 
-                <div className="flex">
-                  {slots.slice(3).map((slot, idx) => (
-                    <Slot key={idx} {...slot} />
-                  ))}
-                </div>
-              </>
-            )}
-          />
-          <div className="mt-5 relative">
-            <p className="font-sans font-bold text-xs lg:text-sm">
+                  <FakeDash />
+
+                  <div className="flex">
+                    {slots.slice(3).map((slot, idx) => (
+                      <Slot key={idx} {...slot} />
+                    ))}
+                  </div>
+                </>
+              )}
+            />
+          </div>
+
+          {error && (
+            <p className="text-red-600 text-sm font-medium mt-3 text-center">
+              {error}
+            </p>
+          )}
+
+          <div className="mt-6 relative w-full flex flex-col items-center">
+            <p className="font-sans font-bold text-xs lg:text-sm text-gray-700">
               Didn't receive the OTP?{" "}
               <span>
                 <button
-                  className="font-normal text-blue-500 disabled:text-gray-300 disabled:cursor-not-allowed"
-                  disabled={cooldown > 0}
+                  className="font-normal text-blue-500 hover:text-blue-600 transition-colors disabled:text-gray-300 disabled:cursor-not-allowed"
+                  disabled={cooldown > 0 || isLoading}
                   onClick={handleResendOTP}
                 >
                   {cooldown > 0 ? `RESEND OTP (${cooldown})` : "RESEND OTP"}
@@ -125,7 +149,7 @@ export default function OtpPage() {
               </span>
             </p>
             {isLoading && (
-              <div className="absolute left-[50%] h-6 w-6 rounded-full border-blue-200 border-3 border-t-blue-400 animate-spin"></div>
+              <div className="mt-3 h-6 w-6 rounded-full border-blue-200 border-3 border-t-blue-400 animate-spin"></div>
             )}
           </div>
         </div>

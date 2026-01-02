@@ -6,10 +6,10 @@ import { useConversationContext } from "@/contexts/ConversationContext";
 import Sidebar from "@/components/Sidebar";
 import MediaPermissionUI from "@/components/MediaPermissionUI";
 import IncomingCallDialog from "@/components/IncomingCallDialog";
-
+import { Toaster } from "sonner";
 import CallScreen from "@/components/CallScreen";
 import { useNavigation } from "@/contexts/NavigationContext";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import BottomBar from "@/components/BottomBar";
 
 export default function Dashboard() {
@@ -25,7 +25,8 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <>
+    <Fragment>
+      <Toaster position="bottom-right" />
       {/* Permission dialog */}
       <MediaPermissionUI open={!mediaOnboarded} />
 
@@ -41,7 +42,14 @@ export default function Dashboard() {
               </div>
             ) : (
               <>
-                <div className="grow h-full overflow-hidden pb-16">
+                <div
+                  className="grow h-full overflow-hidden pb-16"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage({ images: null, currentIndex: null });
+                    setIsAreaClicked(true);
+                  }}
+                >
                   <Chats />
                 </div>
                 <BottomBar />
@@ -56,7 +64,8 @@ export default function Dashboard() {
               autoSaveId="example"
               direction="horizontal"
               ref={chatAreaRef}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setSelectedImage({ images: null, currentIndex: null });
                 setIsAreaClicked(true);
               }}
@@ -72,6 +81,6 @@ export default function Dashboard() {
           </>
         )}
       </div>
-    </>
+    </Fragment>
   );
 }

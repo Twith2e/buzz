@@ -21,7 +21,15 @@ const firebaseConfig = {
 let fcmInitDone = false;
 
 export default function Providers({ children }) {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    },
+  });
   function SocketWithUser({ children }) {
     const { user } = useUserContext();
 

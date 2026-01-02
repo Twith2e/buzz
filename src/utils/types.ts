@@ -165,6 +165,8 @@ export type ChatMessage = {
 export type MessageResponse = {
   status: boolean;
   messages: Message[];
+  hasMore: boolean;
+  nextCursor: string | null;
 };
 
 export type CloudinaryUploadResponse = {

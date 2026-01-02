@@ -6,16 +6,17 @@ export default function Slot(props: SlotProps) {
   return (
     <div
       className={cn(
-        "relative w-10 h-14 text-[2rem]",
+        "relative w-12 h-14 text-2xl",
         "flex items-center justify-center",
-        "transition-all duration-300",
-        "border-border border-y border-r first:border-l first:rounded-l-md last:rounded-r-md",
-        "group-hover:border-accent-foreground/20 group-focus-within:border-accent-foreground/20",
-        "outline outline-0 outline-accent-foreground/20",
-        { "outline-4 outline-accent-foreground": props.isActive }
+        "transition-all duration-200",
+        "bg-gray-100 border border-gray-300 rounded-lg text-black",
+        "shadow-sm",
+        "focus-within:ring-2 focus-within:ring-blue-400",
+        "group-hover:border-gray-400",
+        { "ring-2 ring-blue-400": props.isActive }
       )}
     >
-      <div className="group-has-[input[data-input-otp-placeholder-shown]]:opacity-20">
+      <div className="select-none text-center">
         {props.char ?? props.placeholderChar}
       </div>
       {props.hasFakeCaret && <FakeCaret />}

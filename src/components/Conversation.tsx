@@ -64,6 +64,7 @@ const Convo = ({
       role="button"
       tabIndex={0}
       onClick={() => {
+        push("chat");
         setConversationTitle(
           otherUser
             ? computedTitle(conversation, userContact, otherUser)
@@ -72,7 +73,7 @@ const Convo = ({
         enterConversation(conversation._id);
         fetchConvoMessages(conversation._id);
         setCurrentConversation(conversation);
-        push("chat");
+        setSentMessages([]);
       }}
       className="flex items-start w-full px-4 py-2 rounded-lg"
     >

@@ -19,6 +19,8 @@ import {
   getCloudinarySignature,
   uploadFileToCloudinary,
 } from "@/utils/cloudinary";
+import api from "@/utils/api";
+import { toast } from "sonner";
 
 export default function Settings() {
   const { user, fetchingUser } = useUserContext();
@@ -39,8 +41,15 @@ export default function Settings() {
   }, []);
 
   const onLogout = async () => {
-    localStorage.removeItem("tapo_accessToken");
-    window.location.href = "/";
+    try {
+      await api.post("/users/logout");
+      toast.success("Logged out successfully");
+      localStorage.removeItem("tapo_accessToken");
+      window.location.href = "/";
+    } catch (error) {
+      toast.error("Error logging out");
+      console.error("Error logging out:", error);
+    }
   };
 
   const handleProfilePicChange = async (
