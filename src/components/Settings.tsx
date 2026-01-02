@@ -100,7 +100,7 @@ export default function Settings() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-white dark:bg-black text-gray-900 dark:text-gray-100">
+    <div className="flex h-screen bg-background text-foreground">
       {isMobile ? <BottomBar /> : <Sidebar />}
       <div className={`flex flex-1 ${isMobile ? "pb-16" : ""}`}>
         <div className="px-6 py-4 border-r border-gray-200 dark:border-gray-800 w-full lg:w-[300px]">
@@ -234,7 +234,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="flex-1 lg:flex flex-col items-center justify-center gap-3 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-black/20 hidden ">
+        <div className="flex-1 lg:flex flex-col items-center justify-center gap-3 bg-background text-foreground hidden">
           <LucideSettings size={50} />
           <span className="text-4xl">Settings</span>
           <p className="text-center max-w-lg text-gray-500 dark:text-gray-500">

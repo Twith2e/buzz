@@ -51,8 +51,12 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --background: 220 20% 98%;
+    --foreground: 222 22% 12%;
+    --chat-incoming: 222 18% 18%;
+    --chat-incoming-foreground: 210 20% 92%;
+    --chat-outgoing: 221 83% 60%;
+    --chat-outgoing-foreground: 0 0% 98%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
@@ -78,8 +82,12 @@
     --radius: 0.5rem;
   }
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 0 0% 98%;
+    --background: 220 13% 9%;
+    --foreground: 210 15% 92%;
+    --chat-incoming: 220 14% 94%;
+    --chat-incoming-foreground: 222 22% 14%;
+    --chat-outgoing: 221 83% 55%;
+    --chat-outgoing-foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;

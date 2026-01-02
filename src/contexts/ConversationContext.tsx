@@ -60,6 +60,10 @@ type ConversationContextType = {
   >;
   currentConversation: Conversation | null;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | null>>;
+  hasMore?: boolean;
+  setHasMore?: Dispatch<SetStateAction<boolean>>;
+  cursor?: string | null;
+  setCursor?: Dispatch<SetStateAction<string | null>>;
 };
 
 const ConversationContext = createContext<ConversationContextType>({
@@ -93,6 +97,10 @@ const ConversationContext = createContext<ConversationContextType>({
   setSelectedDoc: () => {},
   currentConversation: null,
   setCurrentConversation: () => {},
+  hasMore: false,
+  setHasMore: () => {},
+  cursor: null,
+  setCursor: () => {},
 });
 
 export default function ConversationContextProvider({
@@ -108,6 +116,8 @@ export default function ConversationContextProvider({
   const [conversations, setConversations] = useState<Conversation[] | null>(
     null
   );
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [cursor, setCursor] = useState<string | null>(null);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
     null
   );
@@ -254,6 +264,10 @@ export default function ConversationContextProvider({
         setSelectedDoc,
         currentConversation,
         setCurrentConversation,
+        hasMore,
+        setHasMore,
+        cursor,
+        setCursor,
       }}
     >
       {children}

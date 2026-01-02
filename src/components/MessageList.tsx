@@ -11,6 +11,7 @@ interface MessageListProps {
   contactList: any[];
   onMessageRightClick: (e: React.MouseEvent, message: any) => void;
   onTagClick: (messageId: string) => void;
+  onReply?: (messageData: any) => void;
   containerRef: RefObject<HTMLDivElement>;
   registerMessageRef: (id: string) => any;
   enrichTaggedMessage: (tm: any) => any;
@@ -25,6 +26,7 @@ export function MessageList({
   contactList,
   onMessageRightClick,
   onTagClick,
+  onReply,
   registerMessageRef,
   enrichTaggedMessage,
   currentConversation,
@@ -41,13 +43,14 @@ export function MessageList({
     <>
       {messages.map((m: any) => (
         <div
-          key={m._id || m.id || m.ts}
+          key={m._id || m.id}
           data-id={m._id || m.id || m.ts}
           data-from={typeof m.from === "string" ? m.from : m.from?._id}
           data-ts={m.ts}
           ref={registerMessageRef(m._id || m.id || m.ts)}
         >
           <Message
+            id={m._id || m.id || m.ts}
             message={m.message}
             isUser={
               typeof m.from === "string"
@@ -86,7 +89,15 @@ export function MessageList({
                   : m.taggedMessage?.from?._id;
               return !!ownerId && ownerId === currentUserId;
             })()}
-            onTagClick={() => onTagClick(m._id || m.id)}
+            onTagClick={() => {
+              const taggedId =
+                typeof m.taggedMessage === "object"
+                  ? m.taggedMessage._id || m.taggedMessage.id
+                  : null;
+
+              if (taggedId) onTagClick(taggedId);
+            }}
+            onReply={onReply}
             handleRightClick={(e) => onMessageRightClick(e, m)}
             sender={
               currentConversation.title && currentConversation?.lastMessage.from

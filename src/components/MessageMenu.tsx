@@ -15,9 +15,9 @@ const MessageMenu = ({
 }) => {
   const { setSelectedMessageId } = useConversationContext();
   return (
-    <div className="p-2 rounded-sm">
+    <div className="rounded-sm text-foreground bg-background border">
       <button
-        className="flex items-center gap-2 hover:bg-emerald-200"
+        className="p-2 flex items-center gap-2 hover:bg-gray-600 cursor-pointer bg-background text-foreground rounded-sm"
         onClick={() => {
           const id = message._id || message.id;
           setSelectedMessageId(id);

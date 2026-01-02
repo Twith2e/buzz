@@ -14,7 +14,7 @@ export default function SidebarButton({
   expanded: boolean;
   id: number;
 }) {
-  const { push } = useNavigation();
+  const { push, current } = useNavigation();
 
   function handleClick() {
     if (text.toLowerCase() === "story") push("status");
@@ -22,14 +22,21 @@ export default function SidebarButton({
     else if (text.toLowerCase() === "settings") push("settings");
   }
 
+  const isActive =
+    (text.toLowerCase() === "conversations" && current.name === "chat") ||
+    (text.toLowerCase() === "story" && current.name === "status") ||
+    (text.toLowerCase() === "settings" && current.name === "settings");
+
   return (
     <button
       onClick={handleClick}
       key={id}
-      className="flex items-center hover:bg-gray-400 w-full px-3 py-[.7rem] transition-all duration-300"
+      className={`${
+        isActive ? "bg-primary text-primary-foreground" : ""
+      } flex items-center hover:bg-primary hover:text-primary-foreground cursor-pointer w-full px-3 py-[.7rem] transition-[color] duration-100`}
       title={text}
     >
-      <span className={`shrink-0 text-${color}`}>
+      <span className={`shrink-0`}>
         <Icon size={24} />
       </span>
 

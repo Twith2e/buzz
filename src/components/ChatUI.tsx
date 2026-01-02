@@ -15,6 +15,7 @@ import { ChatHeader } from "./ChatHeader";
 import { MessageList } from "./MessageList";
 import { ChatForm } from "./ChatForm";
 import { FilePreview } from "./FilePreview";
+import useChatPagination from "@/hooks/useChatPagination";
 
 export default function ChatUI() {
   const [openShare, setOpenShare] = useState(false);
@@ -55,6 +56,8 @@ export default function ChatUI() {
     selectedImage,
     selectedDoc,
     currentConversation,
+    hasMore,
+    cursor,
     setConversations,
   } = useConversationContext();
   const { startCall, callState } = useWebRTC();
@@ -94,10 +97,17 @@ export default function ChatUI() {
     triggerAfterSend: sentMessages?.length || 0,
   });
 
-  useAutoScroll({
+  const { loading: fetchingOlderMessages } = useChatPagination({
     containerRef,
-    trigger: roomId,
+    conversationId: currentConversation?._id || "",
+    hasMore,
+    cursor,
   });
+
+  // useAutoScroll({
+  //   containerRef,
+  //   trigger: roomId,
+  // });
 
   useAutoScroll({
     containerRef,
@@ -195,15 +205,20 @@ export default function ChatUI() {
       top: offset - 40,
       behavior: "smooth",
     });
-    target.classList.add("ring-2", "ring-blue-400", "bg-blue-50");
+    target.classList.add("opacity-70");
     setTimeout(() => {
-      target.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
+      target.classList.remove("opacity-70");
     }, 1200);
   };
 
   const handleClearReply = () => {
     setSelectedMessageId(null);
     setSelectedTag(null);
+  };
+
+  const handleReply = (messageData: any) => {
+    const { id, message: msgText, from } = messageData;
+    setSelectedTag({ id, message: msgText, from });
   };
 
   const userOnlineInfo = usersOnline.find((u) => u._id === contact);
@@ -273,6 +288,7 @@ export default function ChatUI() {
               contactList={contactList}
               onMessageRightClick={handleMessageRightClick}
               onTagClick={handleTagClick}
+              onReply={handleReply}
               containerRef={containerRef}
               registerMessageRef={registerMessageRef}
               enrichTaggedMessage={enrichTaggedMessage}

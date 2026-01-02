@@ -11,8 +11,12 @@ import { FaFilePdf } from "react-icons/fa";
 import type { Message, TaggedMessage } from "@/utils/types";
 import { useUserContext } from "@/contexts/UserContext";
 import { IoDocumentText } from "react-icons/io5";
+import { useRef, useState } from "react";
+
+const SWIPE_THRESHOLD = 60;
 
 const Message = ({
+  id,
   message,
   isUser,
   time,
@@ -23,8 +27,10 @@ const Message = ({
   taggedOwnerIsUser,
   handleRightClick,
   onTagClick,
+  onReply,
   sender,
 }: {
+  id: string;
   message: string;
   isUser: boolean;
   time: string;
@@ -45,9 +51,68 @@ const Message = ({
   sender?: string;
   handleRightClick?: (e: React.MouseEvent) => void;
   onTagClick?: () => void;
+  onReply?: (messageData: any) => void;
 }) => {
   const { contactList } = useUserContext();
+  const touchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startX = useRef(0);
+  const isSwiping = useRef(false);
+  const [translateX, setTranslateX] = useState(0);
+
   if (sender) console.log(sender);
+
+  const handleTouchStartLongPress = () => {
+    touchTimeoutRef.current = setTimeout(() => {
+      const mouseEvent = new MouseEvent("contextmenu", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      });
+      const messageEl = document.querySelector(`[data-id="${id}"]`);
+      if (messageEl) {
+        messageEl.dispatchEvent(mouseEvent);
+      }
+    }, 500);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (translateX > 0) return;
+
+    startX.current = e.touches[0].clientX;
+    isSwiping.current = true;
+    handleTouchStartLongPress();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isSwiping.current) return;
+
+    const currentX = e.touches[0].clientX;
+    const deltaX = currentX - startX.current;
+
+    if (isUser) {
+      if (deltaX < 0) return;
+    } else {
+      if (deltaX > 0) return;
+    }
+
+    setTranslateX(Math.min(Math.abs(deltaX), 90));
+  };
+
+  const handleTouchEnd = () => {
+    if (!isSwiping.current) return;
+    isSwiping.current = false;
+
+    if (touchTimeoutRef.current) {
+      clearTimeout(touchTimeoutRef.current);
+      touchTimeoutRef.current = null;
+    }
+
+    if (translateX > SWIPE_THRESHOLD) {
+      onReply?.({ id, message, from: sender });
+    }
+
+    setTranslateX(0);
+  };
 
   return (
     <div
@@ -58,13 +123,19 @@ const Message = ({
       }}
     >
       <div
-        className={`relative p-3 rounded-2xl max-w-[85%] md:max-w-[70%] lg:max-w-[60%] shadow-sm
+        data-id={id}
+        className={`relative p-3 rounded-2xl max-w-[85%] md:max-w-[70%] lg:max-w-[60%] shadow-sm select-text transition-transform duration-150
       ${
         isUser
-          ? "bg-primary/90 text-primary-foreground dark:bg-primary dark:text-primary-foreground rounded-br-none"
-          : "bg-secondary text-secondary-foreground dark:bg-primary/90 dark:text-primary-foreground border border-border rounded-bl-none"
+          ? "bg-[hsl(var(--chat-outgoing))] text-[hsl(var(--chat-outgoing-foreground))] rounded-br-none"
+          : "bg-[hsl(var(--chat-incoming))] text-[hsl(var(--chat-incoming-foreground))] border border-border rounded-bl-none"
       }
     `}
+        style={{ transform: `translateX(${isUser ? "" : "-"}${translateX}px)` }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         {taggedMessage && (
           <div

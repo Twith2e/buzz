@@ -20,6 +20,8 @@ const Convo = ({
     setSentMessages,
     setConversationTitle,
     setCurrentConversation,
+    setHasMore,
+    setCursor,
   } = useConversationContext();
   const { push } = useNavigation();
 
@@ -51,6 +53,8 @@ const Convo = ({
       const response = await api.get<MessageResponse>(
         `/messages/fetch/${convoId}`
       );
+      setHasMore(response.data.hasMore);
+      setCursor(response.data.nextCursor);
       setSentMessages(response.data.messages);
     } catch (error) {
       console.error(error);
@@ -75,47 +79,45 @@ const Convo = ({
         setCurrentConversation(conversation);
         setSentMessages([]);
       }}
-      className="flex items-start w-full px-4 py-2 rounded-lg"
+      className="flex items-start w-full px-4 py-2 rounded-lg gap-3 justify-between"
     >
-      <div className="flex items-center gap-3 w-[95%]">
-        <div className="h-14 w-14 rounded-full bg-sky-300 text-white border shadow-sm p-1 shrink-0 flex items-center justify-center">
-          {conversation.participants.length === 2 ? (
-            otherUser?.profilePic ? (
-              <img
-                src={otherUser.profilePic}
-                alt="profile"
-                className="h-full w-full rounded-full object-cover"
-              />
-            ) : (
-              <LucideUser2 size={20} />
-            )
+      <div className="h-14 w-14 rounded-full bg-sky-300 text-white border shadow-sm p-1 shrink-0 flex items-center justify-center">
+        {conversation.participants.length === 2 ? (
+          otherUser?.profilePic ? (
+            <img
+              src={otherUser.profilePic}
+              alt="profile"
+              className="h-full w-full rounded-full object-cover"
+            />
           ) : (
-            <LucideUsers size={20} />
-          )}
-        </div>
-        <div className="flex flex-col gap-1 items-start w-full">
-          <span className="max-w-[80%] truncate text-foreground">
-            {otherUser
-              ? computedTitle(conversation, userContact, otherUser)
-              : otherUser?.email}
-          </span>
-          <span className="text-xs truncate max-w-[90%] text-foreground">
-            {conversation.lastMessage ? (
-              conversation.lastMessage.attachments &&
-              conversation.lastMessage.attachments.length > 0 ? (
-                <LastMessage message={conversation.lastMessage} />
-              ) : (
-                conversation.lastMessage.message
-              )
-            ) : conversation.creator === user._id ? (
-              "You created this group"
-            ) : (
-              "You were added"
-            )}
-          </span>
-        </div>
+            <LucideUser2 size={20} />
+          )
+        ) : (
+          <LucideUsers size={20} />
+        )}
       </div>
-      <span className="text-xs whitespace-nowrap flex-1 text-foreground">
+      <div className="flex flex-col gap-1 items-start min-w-0 flex-1">
+        <span className="truncate text-foreground w-full text-left">
+          {otherUser
+            ? computedTitle(conversation, userContact, otherUser)
+            : otherUser?.email}
+        </span>
+        <span className="text-xs truncate text-foreground w-full text-left">
+          {conversation.lastMessage ? (
+            conversation.lastMessage.attachments &&
+            conversation.lastMessage.attachments.length > 0 ? (
+              <LastMessage message={conversation.lastMessage} />
+            ) : (
+              conversation.lastMessage.message
+            )
+          ) : conversation.creator === user._id ? (
+            "You created this group"
+          ) : (
+            "You were added"
+          )}
+        </span>
+      </div>
+      <span className="text-xs whitespace-nowrap shrink-0 text-foreground">
         {formatTime(
           conversation.lastMessage
             ? conversation.lastMessage.ts
