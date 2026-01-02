@@ -33,6 +33,7 @@ export default function Settings() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [updatingProfilePic, setUpdatingProfilePic] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -41,6 +42,7 @@ export default function Settings() {
   }, []);
 
   const onLogout = async () => {
+    setLoggingOut(true);
     try {
       await api.post("/users/logout");
       toast.success("Logged out successfully");
@@ -49,6 +51,8 @@ export default function Settings() {
     } catch (error) {
       toast.error("Error logging out");
       console.error("Error logging out:", error);
+    } finally {
+      setLoggingOut(false);
     }
   };
 
@@ -224,10 +228,17 @@ export default function Settings() {
               <div className="mt-6">
                 <button
                   onClick={onLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md border border-red-200 dark:border-red-900/50 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                  disabled={loggingOut}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md border border-red-200 dark:border-red-900/50 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <LucideLogOut size={16} />
-                  <span className="font-medium">Logout</span>
+                  {loggingOut ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <LucideLogOut size={16} />
+                  )}
+                  <span className="font-medium">
+                    {loggingOut ? "Logging out..." : "Logout"}
+                  </span>
                 </button>
               </div>
             </div>

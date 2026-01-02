@@ -90,9 +90,9 @@ const Message = ({
     const deltaX = currentX - startX.current;
 
     if (isUser) {
-      if (deltaX < 0) return;
-    } else {
       if (deltaX > 0) return;
+    } else {
+      if (deltaX < 0) return;
     }
 
     setTranslateX(Math.min(Math.abs(deltaX), 90));
@@ -131,7 +131,7 @@ const Message = ({
           : "bg-[hsl(var(--chat-incoming))] text-[hsl(var(--chat-incoming-foreground))] border border-border rounded-bl-none"
       }
     `}
-        style={{ transform: `translateX(${isUser ? "" : "-"}${translateX}px)` }}
+        style={{ transform: `translateX(${isUser ? "-" : ""}${translateX}px)` }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
