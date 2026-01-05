@@ -1,5 +1,6 @@
-import { formatTime } from "@/lib/utils";
+import { formatTime, getWaveformWidth } from "@/lib/utils";
 import ImageAttachment from "@/components/ImageAttachment";
+import VoiceWaveform from "@/components/VoiceWaveform";
 import {
   LucideCheck,
   LucideCheckCheck,
@@ -116,7 +117,7 @@ const Message = ({
 
   return (
     <div
-      className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
+      className={`flex w-[full] ${isUser ? "justify-end" : "justify-start"}`}
       onContextMenu={(e) => {
         e.preventDefault();
         handleRightClick?.(e);
@@ -171,8 +172,8 @@ const Message = ({
                           /^(jpg|jpeg|png|gif|webp)$/i.test(fmt || "") ||
                           /\.(jpg|jpeg|png|gif|webp)(\?|#|$)/i.test(url);
                         const isVideo =
-                          /^(mp4|webm|ogg)$/i.test(fmt || "") ||
-                          /\.(mp4|webm|ogg)(\?|#|$)/i.test(url);
+                          /^(mp4|ogg)$/i.test(fmt || "") ||
+                          /\.(mp4|ogg)(\?|#|$)/i.test(url);
                         return (
                           <div
                             key={i}
@@ -221,21 +222,37 @@ const Message = ({
                 const t: string | undefined = fmt
                   ? /^(jpg|jpeg|png|gif|webp)$/i.test(fmt)
                     ? "image"
-                    : /^(mp4|webm|ogg)$/i.test(fmt)
+                    : /^(mp4|ogg)$/i.test(fmt)
                     ? "video"
+                    : /^(webm|wav|mp3|ogg)$/i.test(fmt)
+                    ? "audio"
                     : "doc"
                   : /\.(jpg|jpeg|png|gif|webp)(\?|#|$)/i.test(url)
                   ? "image"
-                  : /\.(mp4|webm|ogg)(\?|#|$)/i.test(url)
+                  : /\.(mp4|ogg|webm)(\?|#|$)/i.test(url)
                   ? "video"
                   : "doc";
 
+                const fileName = (a as any).fileName || (a as any).name || "";
+                const isVoiceNote =
+                  (fmt === "webm" || /\.webm(\?|#|$)/i.test(url)) &&
+                  fileName.toLowerCase().includes("voice-note");
+
                 return (
                   <div key={i} className="">
-                    {t === "image" ? (
+                    {isVoiceNote ? (
+                      <div
+                        className={`
+    ${getWaveformWidth(a.duration || null)}
+    max-w-full
+  `}
+                      >
+                        <VoiceWaveform src={url} height={30} />
+                      </div>
+                    ) : t === "image" ? (
                       <ImageAttachment
                         url={url}
-                        alt={a.fileName || "attachment"}
+                        alt={a.filename || "attachment"}
                         className="max-w-[280px] max-h-[300px] w-auto h-auto rounded-lg object-contain bg-black/5"
                       />
                     ) : t === "video" ? (
@@ -260,7 +277,7 @@ const Message = ({
                         )}
                         <div className="flex flex-col">
                           <span className="font-medium truncate max-w-[140px]">
-                            {a.fileName || "Document"}
+                            {a.filename || "Document"}
                           </span>
                           {a.size && (
                             <span className="text-[10px] opacity-70">

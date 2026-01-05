@@ -19,7 +19,11 @@ export function useInputFocus({
       typeof window !== "undefined" && window.innerWidth < 768;
     const isMobile =
       typeof navigator !== "undefined" &&
-      /Mobi|Android|iPhone|iPad|iPod|Windows Phone/.test(navigator.userAgent);
+      /Mobi|Android|iPhone|iPad|iPod|/.test(navigator.userAgent);
+    const isTouchDevice =
+      typeof navigator !== "undefined" &&
+      ((typeof window !== "undefined" && "ontouchstart" in window) ||
+        (navigator as any).maxTouchPoints > 0);
 
     if (isSmallScreen || isMobile) return;
 
@@ -47,8 +51,12 @@ export function useInputFocus({
     const isMobile =
       typeof navigator !== "undefined" &&
       /Mobi|Android|iPhone|iPad|iPod|Windows Phone/.test(navigator.userAgent);
+    const isTouchDevice =
+      typeof navigator !== "undefined" &&
+      ((typeof window !== "undefined" && "ontouchstart" in window) ||
+        (navigator as any).maxTouchPoints > 0);
 
-    if (isSmallScreen || isMobile) return;
+    if (isSmallScreen || isMobile || isTouchDevice) return;
 
     const id = setTimeout(() => {
       inputRef.current?.focus();

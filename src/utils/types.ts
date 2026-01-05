@@ -70,6 +70,17 @@ export type Participant = {
   profilePic: string | null;
 };
 
+export type Attachment = {
+  format: string;
+  url: string;
+  name?: string;
+  size?: number;
+  duration?: number;
+  filename?: string;
+  height?: number;
+  width?: number;
+};
+
 export type Conversation = {
   _id: string;
   roomId: string;
@@ -86,13 +97,7 @@ export type Conversation = {
     from: string;
     message: string;
     ts: string;
-    attachments: Array<{
-      url: string;
-      format: string;
-      size: number;
-      fileName: string;
-      _id: string;
-    }>;
+    attachments?: Array<Attachment>;
     status: "sent" | string;
     createdAt: string;
     updatedAt: string;
@@ -116,13 +121,7 @@ export type Message = {
   };
   message: string;
   ts: string;
-  attachments: Array<{
-    url: string;
-    format: string;
-    size: number;
-    fileName: string;
-    _id: string;
-  }>;
+  attachments?: Array<Attachment>;
   status: "sent" | string;
   taggedMessage: TaggedMessage;
   createdAt: string;
@@ -150,16 +149,7 @@ export type ChatMessage = {
   ts: string;
   status?: string;
   taggedMessage?: TaggedMessage | { _id?: string; message: string; from: any };
-  attachments?: Array<{
-    format: string;
-    url: string;
-    name?: string;
-    size?: number;
-    duration?: number;
-    filename?: string;
-    height?: number;
-    width?: number;
-  }>;
+  attachments?: Array<Attachment>;
 };
 
 export type MessageResponse = {

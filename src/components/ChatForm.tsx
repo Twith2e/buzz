@@ -1,8 +1,17 @@
 import { LuSendHorizontal } from "react-icons/lu";
-import { LucideSmile, LucideMic, LucideX } from "lucide-react";
+import {
+  LucideSmile,
+  LucideMic,
+  LucideX,
+  LucideStopCircle,
+} from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import FileModal from "./FileModal";
-import { RefObject } from "react";
+import { RefObject, useState, useEffect } from "react";
+import useVoiceRecorder from "@/hooks/useVoiceRecorder";
+import VoiceWaveform from "./VoiceWaveform";
+import { makeClientId } from "@/lib/utils";
+import { useTypingContext } from "@/contexts/TypingContext";
 
 interface ChatFormProps {
   message: string;
@@ -17,6 +26,7 @@ interface ChatFormProps {
   isDisabled: boolean;
   replyMessage: any;
   onClearReply: () => void;
+  onSendVN: (audio: Blob) => void;
 }
 
 export function ChatForm({
@@ -32,7 +42,58 @@ export function ChatForm({
   isDisabled,
   replyMessage,
   onClearReply,
+  onSendVN,
 }: ChatFormProps) {
+  const { start, stop, recording } = useVoiceRecorder();
+  const { setUserTyping } = useTypingContext();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+  const typingTimeoutRef = useState<ReturnType<typeof setTimeout> | null>(
+    null
+  )[0];
+
+  // Track typing state: set to true when message changes, auto-stop after 3s of inactivity
+  const handleMessageChange = (value: string) => {
+    onMessageChange(value);
+
+    if (value.length > 0) {
+      setUserTyping(true);
+    }
+  };
+
+  useEffect(() => {
+    // Stop typing when message is sent
+    if (message.length === 0) {
+      setUserTyping(false);
+    }
+  }, [message, setUserTyping]);
+
+  const handleMicToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!recording) {
+      try {
+        await start();
+      } catch (err) {
+        console.error("start recording failed", err);
+      }
+      return;
+    }
+
+    try {
+      const blob = await stop();
+      if (!blob) return;
+      setPreviewBlob(blob);
+      setPreviewUrl(URL.createObjectURL(blob));
+    } catch (err) {
+      console.error("stop recording failed", err);
+    }
+  };
+
+  const clearPreview = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewBlob(null);
+  };
   return (
     <>
       {replyMessage && (
@@ -133,7 +194,7 @@ export function ChatForm({
           placeholder="Type a message"
           value={message || ""}
           ref={inputRef}
-          onChange={(e) => onMessageChange(e.target.value)}
+          onChange={(e) => handleMessageChange(e.target.value)}
         />
         {message ? (
           <button
@@ -144,9 +205,38 @@ export function ChatForm({
             <LuSendHorizontal size={24} />
           </button>
         ) : (
-          <button type="button">
-            <LucideMic />
+          <button
+            type="button"
+            onClick={handleMicToggle}
+            className={`transition ${recording ? "text-red-500" : ""}`}
+          >
+            <LucideMic size={24} />
           </button>
+        )}
+        {previewUrl && (
+          <div className="flex items-center gap-3 px-4 py-2 border-t bg-background">
+            <VoiceWaveform src={previewUrl} height={32} />
+
+            <button
+              onClick={clearPreview}
+              className="text-red-500"
+              type="button"
+            >
+              <LucideX />
+            </button>
+
+            <button
+              onClick={async () => {
+                if (!previewBlob) return;
+                onSendVN(previewBlob);
+                clearPreview();
+              }}
+              className="ml-auto text-sky-600"
+              type="button"
+            >
+              <LuSendHorizontal size={22} />
+            </button>
+          </div>
         )}
       </form>
     </>

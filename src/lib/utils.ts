@@ -157,3 +157,12 @@ export function computedTitle(
     ? conversation.title
     : userContact?.localName || otherUser?.email;
 }
+
+export const getWaveformWidth = (duration?: number) => {
+  if (!duration) return "w-[180px]";
+
+  if (duration < 10) return "w-[140px]";
+  if (duration < 30) return "w-[200px]";
+  if (duration < 60) return "w-[240px]";
+  return "w-[280px]";
+};

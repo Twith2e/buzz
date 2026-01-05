@@ -9,6 +9,7 @@ import { NavigationProvider } from "@/contexts/NavigationContext";
 import StatusContextProvider from "@/contexts/StatusContext";
 import { ThemeContextProvider } from "@/contexts/ThemeContext";
 import { WebRTCProvider } from "@/contexts/WebRTCContext";
+import { TypingProvider } from "@/contexts/TypingContext";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -86,7 +87,9 @@ export default function Providers({ children }) {
         token={null}
         userId={user?._id || ""}
       >
-        <ConversationContextProvider>{children}</ConversationContextProvider>
+        <TypingProvider userId={user?._id || ""}>
+          <ConversationContextProvider>{children}</ConversationContextProvider>
+        </TypingProvider>
       </SocketContextProvider>
     );
   }

@@ -1,7 +1,9 @@
 import { useSocketContext } from "../contexts/SocketContext";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Loader } from "lucide-react";
 import { useConversationContext } from "../contexts/ConversationContext";
 import { useUserContext } from "@/contexts/UserContext";
+import { useTypingContext } from "@/contexts/TypingContext";
 import MessageMenu from "./MessageMenu";
 import useReadObserver from "@/hooks/useReadObserver";
 import { useGetConversations } from "@/services/conversation/conversation";
@@ -11,11 +13,17 @@ import { useNavigation } from "@/contexts/NavigationContext";
 import { useMessageHandlers } from "@/hooks/useMessageHandlers";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import { useInputFocus } from "@/hooks/useInputFocus";
+import {
+  getCloudinarySignature,
+  uploadFileToCloudinary,
+} from "@/utils/cloudinary";
+import { makeClientId } from "@/lib/utils";
 import { ChatHeader } from "./ChatHeader";
 import { MessageList } from "./MessageList";
 import { ChatForm } from "./ChatForm";
 import { FilePreview } from "./FilePreview";
 import useChatPagination from "@/hooks/useChatPagination";
+import useVoiceRecorder from "@/hooks/useVoiceRecorder";
 
 export default function ChatUI() {
   const [openShare, setOpenShare] = useState(false);
@@ -97,6 +105,13 @@ export default function ChatUI() {
     triggerAfterSend: sentMessages?.length || 0,
   });
 
+  const { setConversationId } = useTypingContext();
+
+  // Update typing context with current conversation
+  useEffect(() => {
+    setConversationId(currentConversation?._id || "");
+  }, [currentConversation?._id, setConversationId]);
+
   const { loading: fetchingOlderMessages } = useChatPagination({
     containerRef,
     conversationId: currentConversation?._id || "",
@@ -104,15 +119,17 @@ export default function ChatUI() {
     cursor,
   });
 
-  // useAutoScroll({
-  //   containerRef,
-  //   trigger: roomId,
-  // });
-
   useAutoScroll({
     containerRef,
-    trigger: sentMessages?.length,
+    trigger: roomId,
   });
+
+  // useAutoScroll({
+  //   containerRef,
+  //   trigger: sentMessages?.length,
+  // });
+
+  const { stop } = useVoiceRecorder();
 
   // Data fetching
   const { data: conversations } = useGetConversations();
@@ -152,6 +169,29 @@ export default function ChatUI() {
     if (!att || att.length === 0) return tm;
     return { ...tm, attachments: att, attachment: att };
   }
+  const handleSendVoice = async (blobArg?: Blob) => {
+    const blob = blobArg || (await stop());
+
+    if (!blob) return;
+
+    const file = new File([blob], "voice-note.webm", {
+      type: "audio/webm",
+    });
+
+    const signData = await getCloudinarySignature("voice-notes");
+    const uploadRes = await uploadFileToCloudinary(file, signData);
+
+    sendMessage("", [
+      {
+        format: uploadRes.format,
+        originalFilename: uploadRes.original_filename,
+        bytes: uploadRes.bytes,
+        url: uploadRes.secure_url,
+        resourceType: uploadRes.resource_type,
+        publicId: uploadRes.public_id,
+      },
+    ]);
+  };
 
   // Send message handler
   const { sendMessage } = useSendMessage({
@@ -166,6 +206,71 @@ export default function ChatUI() {
     setSentMessages,
     setConversations,
   });
+
+  // Listen for voice send events dispatched by ChatForm
+  useEffect(() => {
+    function onSendVoice(e: any) {
+      const { file, tempId } = e.detail || {};
+      if (!file || !roomId) return;
+
+      const clientTempId = tempId || makeClientId();
+      const localUrl = URL.createObjectURL(file);
+
+      const optimistic: any = {
+        id: clientTempId,
+        tempId: clientTempId,
+        conversationId: roomId,
+        from: { _id: user?._id },
+        message: "",
+        ts: new Date().toISOString(),
+        status: "sending",
+        attachments: [
+          {
+            url: localUrl,
+            format: file.type.split("/")[1] || "webm",
+            name: file.name,
+            size: file.size,
+          },
+        ],
+      };
+
+      setSentMessages((prev: any) => {
+        const base = Array.isArray(prev) ? (prev as any[]) : [];
+        return [...base, optimistic];
+      });
+
+      // upload then send via sendMessage with skipOptimistic
+      (async () => {
+        try {
+          const sign = await getCloudinarySignature(`chats/${roomId}`);
+          const res = await uploadFileToCloudinary(file, sign);
+          const url = res.secure_url || res.url;
+          const uploaded = [
+            {
+              url,
+              format: res.format || file.type.split("/")[1] || "webm",
+              name: file.name,
+              bytes: res.bytes || file.size,
+            },
+          ];
+
+          // call sendMessage to emit and let reconciliation happen; skip optimistic because we added one
+          sendMessage("", uploaded, clientTempId, { skipOptimistic: true });
+        } catch (err) {
+          console.error("voice upload/send failed", err);
+        } finally {
+          // revoke local URL
+          try {
+            URL.revokeObjectURL(localUrl);
+          } catch (e) {}
+        }
+      })();
+    }
+
+    window.addEventListener("tapo:send-voice" as any, onSendVoice as any);
+    return () =>
+      window.removeEventListener("tapo:send-voice" as any, onSendVoice as any);
+  }, [roomId, sendMessage, setSentMessages, user?._id]);
 
   // Event handlers
   const handleSendMessage = (e: React.FormEvent) => {
@@ -280,6 +385,14 @@ export default function ChatUI() {
             ref={containerRef}
             onClick={() => menu.open && setMenu({ ...menu, open: false })}
           >
+            {fetchingOlderMessages && (
+              <div className="flex items-center justify-center w-full py-2">
+                <Loader size={16} className="animate-spin" />
+                <span className="ml-2 text-xs text-gray-500">
+                  Loading older messages...
+                </span>
+              </div>
+            )}
             <MessageList
               messages={sentMessages}
               isLoading={isLoadingMessages}
@@ -309,6 +422,7 @@ export default function ChatUI() {
             isDisabled={!initialized || !connected}
             replyMessage={replyMessage}
             onClearReply={handleClearReply}
+            onSendVN={handleSendVoice}
           />
         </>
       ) : (

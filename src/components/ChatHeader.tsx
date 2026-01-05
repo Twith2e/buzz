@@ -1,6 +1,7 @@
 import { LucideArrowLeft, LucidePhone, LucideVideo } from "lucide-react";
 import ConversationTitle from "./ConversationTitle";
 import { formatTime } from "@/lib/utils";
+import TypingIndicator from "./TypingIndicator";
 
 interface ChatHeaderProps {
   conversationTitle: string;
@@ -40,12 +41,17 @@ export function ChatHeader({
             <ConversationTitle title={conversationTitle} />
           </span>
           <span className="text-xs">
-            {isGroup && participantNames.length > 0
-              ? participantNames.join(", ")
-              : userOnlineStatus
-              ? "Online"
-              : `Last seen ${formatTime(userLastSeen || "")}`}
+            {isGroup && participantNames.length > 0 ? (
+              participantNames.join(", ")
+            ) : (
+              <>
+                {userOnlineStatus
+                  ? "Online"
+                  : `Last seen ${formatTime(userLastSeen || "")}`}
+              </>
+            )}
           </span>
+          <TypingIndicator />
         </div>
       </div>
       <div className="flex flex-row-reverse items-center gap-4 pr-4">

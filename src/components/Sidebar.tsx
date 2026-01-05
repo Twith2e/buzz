@@ -24,7 +24,7 @@ const Sidebar = () => {
           <LucideMenu size={25} />
         </button>
 
-        {buttonInfos.slice(0, 3).map(({ id, icon, text }) => (
+        {buttonInfos.slice(0, 2).map(({ id, icon, text }) => (
           <SidebarButton
             key={id}
             icon={icon}
@@ -38,7 +38,7 @@ const Sidebar = () => {
         <div className="border-b-[#36454F] border my-3 w-[90%] m-auto"></div>
       </div>
       <div>
-        {buttonInfos.slice(3).map(({ id, icon, text }, index) => (
+        {buttonInfos.slice(2).map(({ id, icon, text }, index) => (
           <div key={id}>
             {index === 1 ? (
               <>

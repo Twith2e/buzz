@@ -104,6 +104,9 @@ importers:
       vite-plugin-pwa:
         specifier: ^1.2.0
         version: 1.2.0(vite@6.4.1(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1))(workbox-build@7.4.0(@types/babel__core@7.20.5))(workbox-window@7.4.0)
+      wavesurfer.js:
+        specifier: ^7.12.1
+        version: 7.12.1
       zod:
         specifier: ^3.24.2
         version: 3.25.76
@@ -2193,10 +2196,6 @@ packages:
     resolution: {integrity: sha512-Sg0xJUNDU1sJNGdfGWhVHX0kkZ+HWcvmVymJbj6NSgZZmW/8S9Y2HQ5euytnIgakgxN6papOAWiwDo1ctFDcoQ==}
     hasBin: true
 
-  baseline-browser-mapping@2.9.8:
-    resolution: {integrity: sha512-Y1fOuNDowLfgKOypdc9SPABfoWXuZHBOyCS4cD52IeZBhr4Md6CLLs6atcxVrzRmQ06E7hSlm5bHHApPKR/byA==}
-    hasBin: true
-
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
@@ -4241,6 +4240,9 @@ packages:
         optional: true
       yaml:
         optional: true
+
+  wavesurfer.js@7.12.1:
+    resolution: {integrity: sha512-NswPjVHxk0Q1F/VMRemCPUzSojjuHHisQrBqQiRXg7MVbe3f5vQ6r0rTTXA/a/neC/4hnOEC4YpXca4LpH0SUg==}
 
   web-vitals@4.2.4:
     resolution: {integrity: sha512-r4DIlprAGwJ7YM11VZp4R884m0Vmgr6EAKe3P+kO0PPj3Unqyvv59rczf6UiGcb9Z8QxZVcqKNwv/g0WNdWwsw==}
@@ -6619,8 +6621,6 @@ snapshots:
 
   baseline-browser-mapping@2.9.11: {}
 
-  baseline-browser-mapping@2.9.8: {}
-
   basic-ftp@5.0.5: {}
 
   big-integer@1.6.52: {}
@@ -6665,7 +6665,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.8
+      baseline-browser-mapping: 2.9.11
       caniuse-lite: 1.0.30001760
       electron-to-chromium: 1.5.267
       node-releases: 2.0.27
@@ -8926,6 +8926,8 @@ snapshots:
       jiti: 2.6.1
       lightningcss: 1.30.2
       terser: 5.44.1
+
+  wavesurfer.js@7.12.1: {}
 
   web-vitals@4.2.4: {}
 

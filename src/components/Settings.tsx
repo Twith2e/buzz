@@ -229,7 +229,7 @@ export default function Settings() {
                 <button
                   onClick={onLogout}
                   disabled={loggingOut}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md border border-red-200 dark:border-red-900/50 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-md border border-red-200 dark:border-red-900/50 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loggingOut ? (
                     <Loader size={16} className="animate-spin" />

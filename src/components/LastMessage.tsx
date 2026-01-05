@@ -1,5 +1,10 @@
 import { Conversation } from "@/utils/types";
-import { LucideFile, LucideImage, LucideVideo } from "lucide-react";
+import {
+  LucideFile,
+  LucideImage,
+  LucideVideo,
+  LucideAudioLines,
+} from "lucide-react";
 
 const LastMessage = ({ message }: { message: Conversation["lastMessage"] }) => {
   let type: string;
@@ -15,8 +20,7 @@ const LastMessage = ({ message }: { message: Conversation["lastMessage"] }) => {
   } else if (
     message.attachments &&
     message.attachments.length > 0 &&
-    (message.attachments[message.attachments.length - 1].format === "mp4" ||
-      message.attachments[message.attachments.length - 1].format === "webm")
+    message.attachments[message.attachments.length - 1].format === "mp4"
   ) {
     type = "video";
   } else if (
@@ -27,6 +31,12 @@ const LastMessage = ({ message }: { message: Conversation["lastMessage"] }) => {
       message.attachments[message.attachments.length - 1].format === "docx")
   ) {
     type = "document";
+  } else if (
+    message.attachments &&
+    message.attachments.length > 0 &&
+    message.attachments[message.attachments.length - 1].format === "webm"
+  ) {
+    type = "audio";
   } else {
     type = "text";
   }
@@ -36,6 +46,8 @@ const LastMessage = ({ message }: { message: Conversation["lastMessage"] }) => {
       ? "Image"
       : type === "video"
       ? "Video"
+      : type === "audio"
+      ? "Audio"
       : type === "document"
       ? "Document"
       : "";
@@ -46,6 +58,8 @@ const LastMessage = ({ message }: { message: Conversation["lastMessage"] }) => {
         <LucideImage size={12} />
       ) : type === "video" ? (
         <LucideVideo size={12} />
+      ) : type === "audio" ? (
+        <LucideAudioLines size={12} />
       ) : (
         <LucideFile size={12} />
       )}

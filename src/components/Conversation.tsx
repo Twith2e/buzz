@@ -81,7 +81,7 @@ const Convo = ({
       }}
       className="flex items-start w-full px-4 py-2 rounded-lg gap-3 justify-between"
     >
-      <div className="h-14 w-14 rounded-full bg-sky-300 text-white border shadow-sm p-1 shrink-0 flex items-center justify-center">
+      <div className="h-14 w-14 rounded-full bg-sky-300 text-white border shadow-sm shrink-0 flex items-center justify-center">
         {conversation.participants.length === 2 ? (
           otherUser?.profilePic ? (
             <img
