@@ -124,10 +124,10 @@ export default function ChatUI() {
     trigger: roomId,
   });
 
-  // useAutoScroll({
-  //   containerRef,
-  //   trigger: sentMessages?.length,
-  // });
+  useAutoScroll({
+    containerRef,
+    trigger: sentMessages?.length,
+  });
 
   const { stop } = useVoiceRecorder();
 

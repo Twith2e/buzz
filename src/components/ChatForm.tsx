@@ -48,9 +48,6 @@ export function ChatForm({
   const { setUserTyping } = useTypingContext();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
-  const typingTimeoutRef = useState<ReturnType<typeof setTimeout> | null>(
-    null
-  )[0];
 
   // Track typing state: set to true when message changes, auto-stop after 3s of inactivity
   const handleMessageChange = (value: string) => {

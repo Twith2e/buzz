@@ -41,7 +41,10 @@ export const TypingProvider = ({
         } else {
           updated.delete(receivedUserId);
         }
-        console.log("[TypingContext] Updated typingUsers:", Array.from(updated.keys()));
+        console.log(
+          "[TypingContext] Updated typingUsers:",
+          Array.from(updated.keys())
+        );
         return updated;
       });
     },
@@ -68,7 +71,11 @@ export const TypingProvider = ({
 
   return (
     <TypingContext.Provider
-      value={{ typingUsers, setUserTyping, setConversationId: setConversationIdWrapper }}
+      value={{
+        typingUsers,
+        setUserTyping,
+        setConversationId: setConversationIdWrapper,
+      }}
     >
       {children}
     </TypingContext.Provider>

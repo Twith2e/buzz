@@ -215,6 +215,7 @@ export default function ConversationContextProvider({
                 __v: 0,
               },
             };
+            setCurrentConversation(newConvo);
             return [newConvo, ...list];
           });
         }
@@ -226,6 +227,13 @@ export default function ConversationContextProvider({
     setRoomId(roomId);
     setInitialized(true);
     emit("join:conversation", { roomId });
+    // Find and set the current conversation from the list
+    const current = conversations?.find(
+      (c: any) => c._id === roomId || c.roomId === roomId
+    );
+    if (current) {
+      setCurrentConversation(current);
+    }
   }
 
   useEffect(() => {
