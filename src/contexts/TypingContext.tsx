@@ -30,6 +30,10 @@ export const TypingProvider = ({
 
   const handleTypingReceived = useCallback(
     (receivedUserId: string, typing: boolean) => {
+      console.log("[TypingContext] Received typing event:", {
+        receivedUserId,
+        typing,
+      });
       setTypingUsers((prev) => {
         const updated = new Map(prev);
         if (typing) {
@@ -37,6 +41,7 @@ export const TypingProvider = ({
         } else {
           updated.delete(receivedUserId);
         }
+        console.log("[TypingContext] Updated typingUsers:", Array.from(updated.keys()));
         return updated;
       });
     },
@@ -52,12 +57,18 @@ export const TypingProvider = ({
   });
 
   const setUserTyping = useCallback((typing: boolean) => {
+    console.log("[TypingContext] setUserTyping:", typing);
     setIsUserTyping(typing);
+  }, []);
+
+  const setConversationIdWrapper = useCallback((id: string) => {
+    console.log("[TypingContext] setConversationId:", id);
+    setConversationId(id);
   }, []);
 
   return (
     <TypingContext.Provider
-      value={{ typingUsers, setUserTyping, setConversationId }}
+      value={{ typingUsers, setUserTyping, setConversationId: setConversationIdWrapper }}
     >
       {children}
     </TypingContext.Provider>

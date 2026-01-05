@@ -25,6 +25,11 @@ const useUserTyping = ({
 
     const now = Date.now();
     if (now - lastEmit.current > EMIT_INTERVAL) {
+      console.log("[useUserTyping] Emitting typing:sent", {
+        conversationId,
+        userId,
+        typing: true,
+      });
       emit("typing:sent", { conversationId, userId, typing: true });
       lastEmit.current = now;
     }
@@ -32,6 +37,11 @@ const useUserTyping = ({
     if (stopTimeout.current) clearTimeout(stopTimeout.current);
 
     stopTimeout.current = setTimeout(() => {
+      console.log("[useUserTyping] Emitting typing:sent (stop)", {
+        conversationId,
+        userId,
+        typing: false,
+      });
       emit("typing:sent", { conversationId, userId, typing: false });
       stopTimeout.current = null;
     }, TYPING_TIMEOUT);
@@ -45,6 +55,13 @@ const useUserTyping = ({
         userId: string;
         typing: boolean;
       }) => {
+        console.log("[useUserTyping] Received typing:received", payload, {
+          currentConversationId: conversationId,
+          currentUserId: userId,
+          willProcess:
+            payload.conversationId === conversationId &&
+            payload.userId !== userId,
+        });
         if (
           payload.conversationId !== conversationId ||
           payload.userId === userId

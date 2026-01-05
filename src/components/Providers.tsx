@@ -26,7 +26,6 @@ export default function Providers({ children }) {
     defaultOptions: {
       queries: {
         retry: false,
-        refetchOnWindowFocus: false,
         refetchOnReconnect: false,
       },
     },

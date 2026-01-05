@@ -5,6 +5,8 @@ export default function TypingIndicator() {
   const { typingUsers } = useTypingContext();
   const { contactList } = useUserContext();
 
+  console.log("[TypingIndicator] typingUsers size:", typingUsers.size);
+
   if (typingUsers.size === 0) {
     return null;
   }
