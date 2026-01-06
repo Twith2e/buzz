@@ -105,6 +105,11 @@ export function useMessageHandlers({
         online: boolean;
         lastSeen?: string;
       }) => {
+        console.log("[presence:update] Received:", {
+          userId,
+          online,
+          lastSeen,
+        });
         setUsersOnline((prev) => {
           const idx = prev.findIndex((u) => u._id === userId);
           if (idx === -1) return [...prev, { _id: userId, online, lastSeen }];
@@ -118,11 +123,5 @@ export function useMessageHandlers({
     return off;
   }, [on, setUsersOnline]);
 
-  // Emit presence update for current user
-  useEffect(() => {
-    emit("presence:update", {
-      online: true,
-      lastSeen: new Date().toISOString(),
-    });
-  }, [roomId, emit]);
+  // Removed manual presence:update emit as it is handled by socket connection and visibility events in useSocket.tsx
 }

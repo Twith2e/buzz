@@ -29,22 +29,27 @@ export default function useSocket({
     const socket = socketRef.current;
 
     socket.on("connect", () => {
-      socket.emit("client:visibility", document.visibilityState);
-      console.log("connected:", document.visibilityState);
+      const isVisible = document.visibilityState === "visible";
+      socket.emit("client:visibility", { visible: isVisible });
+      console.log("connected:", isVisible);
 
       setConnected(true);
     });
 
-    window.addEventListener("visibilitychange", () => {
-      socket.emit("client:visibility", { visible: document.visibilityState });
-      console.log("visibilitychange:", document.visibilityState);
-    });
+    const handleVisibilityChange = () => {
+      const isVisible = document.visibilityState === "visible";
+      socket.emit("client:visibility", { visible: isVisible });
+      console.log("visibilitychange:", isVisible);
+    };
+
+    window.addEventListener("visibilitychange", handleVisibilityChange);
 
     socket.on("disconnect", () => setConnected(false));
     socket.on("connect_error", (err) =>
       console.error("socket connection error", err)
     );
     return () => {
+      window.removeEventListener("visibilitychange", handleVisibilityChange);
       socket.disconnect();
       setSocket(null);
     };
