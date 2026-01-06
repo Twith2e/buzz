@@ -1,7 +1,6 @@
 import { LucideArrowLeft, LucidePhone, LucideVideo } from "lucide-react";
 import ConversationTitle from "./ConversationTitle";
-import { formatTime } from "@/lib/utils";
-import TypingIndicator from "./TypingIndicator";
+import { formatLastSeen, formatTime } from "@/lib/utils";
 
 interface ChatHeaderProps {
   conversationTitle: string;
@@ -29,7 +28,7 @@ export function ChatHeader({
   showBackButton = true,
 }: ChatHeaderProps) {
   return (
-    <header className="bg-background dark:bg-matteBlack text-foreground w-full p-3 h-16 border-b flex items-center justify-between">
+    <header className="bg-background dark:bg-matteBlack text-foreground w-full p-3 h-16 border-b flex items-center justify-between sticky top-0 z-10">
       <div className="flex items-center gap-2">
         {showBackButton && (
           <button onClick={onBack} className="md:hidden text-foreground">
@@ -47,11 +46,12 @@ export function ChatHeader({
               <>
                 {userOnlineStatus
                   ? "Online"
-                  : `Last seen ${formatTime(userLastSeen || "")}`}
+                  : userLastSeen
+                  ? `Last seen ${formatLastSeen(userLastSeen)}`
+                  : ""}
               </>
             )}
           </span>
-          <TypingIndicator />
         </div>
       </div>
       <div className="flex flex-row-reverse items-center gap-4 pr-4">

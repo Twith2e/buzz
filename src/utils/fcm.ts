@@ -72,7 +72,10 @@ export async function registerForFCM(
 
     // Get FCM token. Note: throws on failure.
     const swReg = await navigator.serviceWorker.getRegistration();
-    const currentToken = await getToken(messaging, { vapidKey, serviceWorkerRegistration: swReg || undefined });
+    const currentToken = await getToken(messaging, {
+      vapidKey,
+      serviceWorkerRegistration: swReg || undefined,
+    });
     if (!currentToken) {
       console.warn("FCM: getToken returned no token");
       return null;
@@ -86,7 +89,11 @@ export async function registerForFCM(
     );
 
     if (resp.status !== 200) {
-      console.error("Failed to save FCM token on server:", resp.status, resp.data);
+      console.error(
+        "Failed to save FCM token on server:",
+        resp.status,
+        resp.data
+      );
       return currentToken;
     }
 
@@ -106,26 +113,45 @@ export function onForegroundMessage(
   firebaseConfig: Record<string, any>,
   cb: (payload: MessagePayload) => void
 ): () => void {
+  // Protect against non-browser or environments without service worker support
+  if (typeof window === "undefined") {
+    console.warn("onForegroundMessage called in non-browser environment");
+    return () => {};
+  }
+
+  if (!("serviceWorker" in navigator)) {
+    // firebase-messaging expects navigator.serviceWorker; guard to avoid runtime errors
+    console.warn(
+      "onForegroundMessage: serviceWorker not supported in this environment"
+    );
+    return () => {};
+  }
+
   // init firebase app (idempotent)
   initFirebase(firebaseConfig);
 
-  const messaging = getMessaging();
+  try {
+    const messaging = getMessaging();
 
-  const unsubscribe = onMessage(messaging, (payload) => {
-    try {
-      cb(payload);
-    } catch (e) {
-      console.error("onForegroundMessage callback error:", e);
-    }
-  });
+    const unsubscribe = onMessage(messaging, (payload) => {
+      try {
+        cb(payload);
+      } catch (e) {
+        console.error("onForegroundMessage callback error:", e);
+      }
+    });
 
-  // onMessage returns an unsubscribe function in v9; return that to caller
-  return () => {
-    try {
-      unsubscribe();
-    } catch (e) {
-      // If unsubscribe isn't a function or fails, ignore but log
-      console.warn("Failed to unsubscribe onForegroundMessage:", e);
-    }
-  };
+    // onMessage returns an unsubscribe function in v9; return that to caller
+    return () => {
+      try {
+        unsubscribe();
+      } catch (e) {
+        // If unsubscribe isn't a function or fails, ignore but log
+        console.warn("Failed to unsubscribe onForegroundMessage:", e);
+      }
+    };
+  } catch (err) {
+    console.warn("onForegroundMessage: failed to initialize messaging", err);
+    return () => {};
+  }
 }

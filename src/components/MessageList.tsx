@@ -2,6 +2,9 @@ import { RefObject } from "react";
 import Message from "./Message";
 import { MessageSkeleton } from "./MessageSkeleton";
 import type { ChatMessage } from "@/utils/types";
+import { useTypingContext } from "@/contexts/TypingContext";
+import { useUserContext } from "@/contexts/UserContext";
+import TypingIndicator from "./TypingIndicator";
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -31,6 +34,8 @@ export function MessageList({
   enrichTaggedMessage,
   currentConversation,
 }: MessageListProps) {
+  const { typingUsers } = useTypingContext();
+  const { contactList: userContactList } = useUserContext();
   if (isLoading && roomId) {
     return <MessageSkeleton />;
   }
@@ -174,6 +179,13 @@ export function MessageList({
           ))}
         </div>
       ))}
+
+      {/* Typing indicator as a message at the bottom */}
+      {typingUsers.size > 0 && (
+        <div className="mb-2 pl-2">
+          <TypingIndicator />
+        </div>
+      )}
     </>
   );
 }

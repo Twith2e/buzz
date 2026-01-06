@@ -3,7 +3,7 @@ import React, {
   useContext,
   useState,
   useCallback,
-  useEffect,
+  useRef,
 } from "react";
 import useUserTyping from "@/hooks/useUserTyping";
 
@@ -27,6 +27,9 @@ export const TypingProvider = ({
     new Map()
   );
   const [isUserTyping, setIsUserTyping] = useState(false);
+  const clearTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  );
 
   const handleTypingReceived = useCallback(
     (receivedUserId: string, typing: boolean) => {
@@ -34,19 +37,39 @@ export const TypingProvider = ({
         receivedUserId,
         typing,
       });
-      setTypingUsers((prev) => {
-        const updated = new Map(prev);
-        if (typing) {
+
+      // Clear any existing timer for this user
+      const existingTimer = clearTimers.current.get(receivedUserId);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+        clearTimers.current.delete(receivedUserId);
+      }
+
+      if (typing) {
+        // User is typing - add them to the map
+        setTypingUsers((prev) => {
+          const updated = new Map(prev);
           updated.set(receivedUserId, true);
-        } else {
+          console.log(
+            "[TypingContext] Updated typingUsers:",
+            Array.from(updated.keys())
+          );
+          return updated;
+        });
+      } else {
+        // User stopped typing - remove immediately
+        setTypingUsers((prev) => {
+          const updated = new Map(prev);
           updated.delete(receivedUserId);
-        }
-        console.log(
-          "[TypingContext] Updated typingUsers:",
-          Array.from(updated.keys())
-        );
-        return updated;
-      });
+          console.log(
+            "[TypingContext] Removed typing user:",
+            receivedUserId,
+            "Remaining:",
+            Array.from(updated.keys())
+          );
+          return updated;
+        });
+      }
     },
     []
   );

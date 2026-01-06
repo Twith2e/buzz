@@ -17,6 +17,9 @@ export default function Dashboard() {
   const { setSelectedImage } = useConversationContext();
   const { current } = useNavigation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [mediaDialogOpen, setMediaDialogOpen] = useState<boolean>(
+    !mediaOnboarded
+  );
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -24,11 +27,16 @@ export default function Dashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    // keep dialog open state in sync with onboarding flag
+    setMediaDialogOpen(!mediaOnboarded);
+  }, [mediaOnboarded]);
+
   return (
     <Fragment>
       <Toaster position="bottom-right" />
       {/* Permission dialog */}
-      <MediaPermissionUI open={!mediaOnboarded} />
+      <MediaPermissionUI open={mediaDialogOpen} setOpen={setMediaDialogOpen} />
 
       <IncomingCallDialog />
       <CallScreen />

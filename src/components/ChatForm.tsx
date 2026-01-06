@@ -152,7 +152,7 @@ export function ChatForm({
         </div>
       )}
       <form
-        className="border-t border-sky-300 px-4 flex items-center h-14 bg-background"
+        className="border-t border-sky-300 px-4 flex items-center h-14 bg-background sticky bottom-0 z-10"
         onSubmit={onSubmit}
       >
         <div className="flex items-center gap-5 pr-5">

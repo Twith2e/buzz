@@ -17,6 +17,35 @@ export function formatTime(time: string): string {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+export function formatLastSeen(time: string): string {
+  const date = new Date(time);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const now = new Date();
+  const isToday =
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+
+  const isYesterday =
+    date.getDate() === now.getDate() - 1 &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+
+  const timeString = date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  if (isToday) {
+    return `today at ${timeString}`;
+  } else if (isYesterday) {
+    return `yesterday at ${timeString}`;
+  } else {
+    return `${date.toLocaleDateString()} at ${timeString}`;
+  }
+}
+
 export function formatRelativeTime(time: string): string {
   const date = new Date(time);
   const now = new Date();
