@@ -124,23 +124,5 @@ export function useMessageHandlers({
       online: true,
       lastSeen: new Date().toISOString(),
     });
-
-    const handleVisibilityChange = () => {
-      const isVisible = document.visibilityState === "visible";
-      emit("presence:update", {
-        online: isVisible,
-        lastSeen: new Date().toISOString(),
-      });
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      emit("presence:update", {
-        online: false,
-        lastSeen: new Date().toISOString(),
-      });
-    };
   }, [roomId, emit]);
 }

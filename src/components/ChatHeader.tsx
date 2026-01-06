@@ -1,6 +1,6 @@
 import { LucideArrowLeft, LucidePhone, LucideVideo } from "lucide-react";
 import ConversationTitle from "./ConversationTitle";
-import { formatLastSeen, formatTime } from "@/lib/utils";
+import { formatLastSeen } from "@/lib/utils";
 
 interface ChatHeaderProps {
   conversationTitle: string;
