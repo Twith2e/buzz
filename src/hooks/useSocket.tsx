@@ -55,8 +55,6 @@ export default function useSocket({
     };
   }, [url, token, userId]);
 
-  /* ------------------ HELPERS ------------------ */
-
   const emit = (event: string, payload: any, ack?: (data: any) => void) => {
     if (ack) {
       socketRef.current?.emit(event, payload, ack);
