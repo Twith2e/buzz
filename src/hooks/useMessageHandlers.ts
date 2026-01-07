@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { formatAttachments } from "@/lib/utils";
-import type { ChatMessage } from "@/utils/types";
+import type { ChatMessage, Conversation } from "@/utils/types";
 
 interface UseMessageHandlersProps {
   on: ((event: string, handler: (data: any) => void) => () => void) | null;
   roomId: string;
   emit: (event: string, data: any) => void;
   setSentMessages: (fn: (prev: any) => ChatMessage[]) => void;
+  setConversations: (fn: (prev: Conversation[]) => Conversation[]) => void;
   setUsersOnline: (fn: (prev: any) => any) => void;
 }
 
@@ -16,6 +17,7 @@ export function useMessageHandlers({
   emit,
   setSentMessages,
   setUsersOnline,
+  setConversations,
 }: UseMessageHandlersProps) {
   // Handle incoming messages
   useEffect(() => {
@@ -45,6 +47,34 @@ export function useMessageHandlers({
       setSentMessages((prev: any) => {
         const base = Array.isArray(prev) ? (prev as ChatMessage[]) : [];
         return [...base, normalized];
+      });
+
+      setConversations((prev: any) => {
+        if (!prev) return prev;
+        const targetIndex = prev.findIndex(
+          (c: any) => c.roomId === roomId || c._id === roomId
+        );
+        if (targetIndex === -1) return prev;
+
+        const updatedConversation = {
+          ...prev[targetIndex],
+          lastMessage: {
+            ...prev[targetIndex].lastMessage,
+            from: normalized.from,
+            message:
+              normalized.message ||
+              (normalized.attachments ? "Attachment" : ""),
+            ts: new Date().toISOString(),
+            status: "sending",
+          },
+          updatedAt: new Date().toISOString(),
+        };
+
+        const newConversations = [...prev];
+        newConversations.splice(targetIndex, 1);
+        newConversations.unshift(updatedConversation);
+
+        return newConversations;
       });
 
       emit("message:received", {

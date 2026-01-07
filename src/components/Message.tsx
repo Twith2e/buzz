@@ -1,4 +1,4 @@
-import { formatTime, getWaveformWidth } from "@/lib/utils";
+import { formatTime, getWaveformWidth, titleCase } from "@/lib/utils";
 import ImageAttachment from "@/components/ImageAttachment";
 import VoiceWaveform from "@/components/VoiceWaveform";
 import {
@@ -298,8 +298,10 @@ const Message = ({
           <div className="flex flex-col relative z-10">
             {sender && !isUser && (
               <span className="text-[11px] font-bold text-orange-500 mb-1">
-                {contactList.find((u) => u.contactProfile._id === sender)
-                  ?.localName || sender}
+                {titleCase(
+                  contactList.find((u) => u.contactProfile._id === sender)
+                    ?.localName || sender
+                )}
               </span>
             )}
             <span className="block wrap-break-word whitespace-pre-wrap leading-relaxed mr-14 text-[15px] mb-2">

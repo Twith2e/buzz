@@ -4,63 +4,62 @@ interface UseInputFocusProps {
   inputRef: RefObject<HTMLInputElement>;
   shouldFocus: boolean;
   triggerAfterSend: number;
+  selectedTag: {
+    id: string;
+    message: string;
+    from: any;
+  } | null;
+}
+
+function canAutoFocus() {
+  if (typeof window === "undefined") return false;
+
+  return (
+    window.matchMedia("(pointer: fine)").matches &&
+    window.matchMedia("(hover: hover)").matches
+  );
 }
 
 export function useInputFocus({
   inputRef,
   shouldFocus,
   triggerAfterSend,
+  selectedTag,
 }: UseInputFocusProps) {
-  // Auto-focus on room change
+  // Focus on room / reply change
   useEffect(() => {
     if (!shouldFocus) return;
+    if (!canAutoFocus()) return;
 
-    const isSmallScreen =
-      typeof window !== "undefined" && window.innerWidth < 768;
-    const isMobile =
-      typeof navigator !== "undefined" &&
-      /Mobi|Android|iPhone|iPad|iPod|/.test(navigator.userAgent);
-    const isTouchDevice =
-      typeof navigator !== "undefined" &&
-      ((typeof window !== "undefined" && "ontouchstart" in window) ||
-        (navigator as any).maxTouchPoints > 0);
+    const id = requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (!el) return;
 
-    if (isSmallScreen || isMobile) return;
-
-    const id = window.requestAnimationFrame(() => {
-      if (inputRef.current) {
-        try {
-          inputRef.current.focus();
-          const len = inputRef.current.value?.length || 0;
-          inputRef.current.setSelectionRange(len, len);
-        } catch (err) {
-          // ignore errors on mobile browsers that block focus
-        }
+      try {
+        el.focus();
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
+      } catch {
+        // silently fail (Safari / iOS)
       }
     });
 
     return () => cancelAnimationFrame(id);
-  }, [shouldFocus, inputRef]);
+  }, [shouldFocus, selectedTag, inputRef]);
 
-  // Focus after message is sent
+  // Focus after sending message
   useEffect(() => {
-    if (!inputRef.current) return;
+    if (!canAutoFocus()) return;
 
-    const isSmallScreen =
-      typeof window !== "undefined" && window.innerWidth < 768;
-    const isMobile =
-      typeof navigator !== "undefined" &&
-      /Mobi|Android|iPhone|iPad|iPod|Windows Phone/.test(navigator.userAgent);
-    const isTouchDevice =
-      typeof navigator !== "undefined" &&
-      ((typeof window !== "undefined" && "ontouchstart" in window) ||
-        (navigator as any).maxTouchPoints > 0);
-
-    if (isSmallScreen || isMobile || isTouchDevice) return;
+    const el = inputRef.current;
+    if (!el) return;
 
     const id = setTimeout(() => {
-      inputRef.current?.focus();
+      try {
+        el.focus();
+      } catch {}
     }, 50);
+
     return () => clearTimeout(id);
-  }, [triggerAfterSend, inputRef]);
+  }, [triggerAfterSend, selectedTag, inputRef]);
 }

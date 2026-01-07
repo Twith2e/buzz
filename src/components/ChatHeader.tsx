@@ -28,7 +28,7 @@ export function ChatHeader({
   showBackButton = true,
 }: ChatHeaderProps) {
   return (
-    <header className="bg-background dark:bg-matteBlack text-foreground w-full p-3 h-16 border-b flex items-center justify-between sticky top-0 z-10">
+    <header className="top-0 right-0 w-full bg-background dark:bg-matteBlack text-foreground p-3 h-16 border-b flex items-center justify-between z-10">
       <div className="flex items-center gap-2">
         {showBackButton && (
           <button onClick={onBack} className="md:hidden text-foreground">

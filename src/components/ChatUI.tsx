@@ -87,6 +87,7 @@ export default function ChatUI() {
     emit,
     setSentMessages,
     setUsersOnline,
+    setConversations,
   });
 
   const shouldFocus = !(
@@ -103,6 +104,7 @@ export default function ChatUI() {
     inputRef,
     shouldFocus,
     triggerAfterSend: sentMessages?.length || 0,
+    selectedTag,
   });
 
   const { setConversationId } = useTypingContext();
@@ -381,7 +383,7 @@ export default function ChatUI() {
           )}
 
           <div
-            className="grow overflow-y-auto p-4 flex flex-col gap-3 h-[80%]"
+            className="flex-1 overflow-y-auto p-4 flex flex-col gap-3"
             ref={containerRef}
             onClick={() => menu.open && setMenu({ ...menu, open: false })}
           >

@@ -92,7 +92,7 @@ export function ChatForm({
     setPreviewBlob(null);
   };
   return (
-    <>
+    <div className="w-full z-10 bg-background border-t">
       {replyMessage && (
         <div className="px-2 py-1 bg-gray-100 border-t border-b border-gray-300 flex items-center justify-between">
           <div className="flex items-start gap-2 overflow-hidden">
@@ -152,7 +152,7 @@ export function ChatForm({
         </div>
       )}
       <form
-        className="border-t border-sky-300 px-4 flex items-center h-14 bg-background sticky bottom-0 z-10"
+        className="border-t border-sky-300 px-4 flex items-center h-14 bg-background w-full"
         onSubmit={onSubmit}
       >
         <div className="flex items-center gap-5 pr-5">
@@ -236,6 +236,6 @@ export function ChatForm({
           </div>
         )}
       </form>
-    </>
+    </div>
   );
 }

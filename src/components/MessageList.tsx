@@ -170,10 +170,29 @@ export function MessageList({
                 }}
                 onReply={onReply}
                 handleRightClick={(e) => onMessageRightClick(e, m)}
-                sender={
-                  currentConversation.title &&
-                  currentConversation?.lastMessage.from
-                }
+                sender={(() => {
+                  const isGroup = currentConversation?.participants?.length > 2;
+                  if (!isGroup) return null;
+
+                  const senderId =
+                    typeof m.from === "string" ? m.from : m.from?._id;
+                  if (senderId === currentUserId) return null;
+
+                  const senderProfile =
+                    typeof m.from === "object" ? m.from : null;
+                  const contact = (contactList || []).find(
+                    (c) =>
+                      c.contactProfile?._id === senderId || c._id === senderId
+                  );
+
+                  return (
+                    contact?.localName ||
+                    contact?.contactProfile?.displayName ||
+                    senderProfile?.displayName ||
+                    senderProfile?.email ||
+                    "Unknown"
+                  );
+                })()}
               />
             </div>
           ))}
