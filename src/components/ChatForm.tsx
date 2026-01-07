@@ -1,16 +1,10 @@
 import { LuSendHorizontal } from "react-icons/lu";
-import {
-  LucideSmile,
-  LucideMic,
-  LucideX,
-  LucideStopCircle,
-} from "lucide-react";
+import { LucideSmile, LucideMic, LucideX } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import FileModal from "./FileModal";
 import { RefObject, useState, useEffect } from "react";
 import useVoiceRecorder from "@/hooks/useVoiceRecorder";
 import VoiceWaveform from "./VoiceWaveform";
-import { makeClientId } from "@/lib/utils";
 import { useTypingContext } from "@/contexts/TypingContext";
 
 interface ChatFormProps {
@@ -48,6 +42,8 @@ export function ChatForm({
   const { setUserTyping } = useTypingContext();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+
+  const isVoiceMode = recording || Boolean(previewUrl);
 
   // Track typing state: set to true when message changes, auto-stop after 3s of inactivity
   const handleMessageChange = (value: string) => {
@@ -155,36 +151,41 @@ export function ChatForm({
         className="border-t border-sky-300 px-4 flex items-center h-14 bg-background w-full"
         onSubmit={onSubmit}
       >
-        <div className="flex items-center gap-5 pr-5">
-          <button
-            className={`p-1 rounded-md cursor-pointer hover:bg-sky-300 hover:text-white grow-0`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onIsAreaClickedChange(!isAreaClicked);
-            }}
-            type="button"
-          >
-            <LucideSmile size={20} />
-          </button>
-          <div
-            ref={emojiRef}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            className={`-bottom-[145px] fixed transition-transform duration-500 ease-in-out bg-background z-50 ${
-              isAreaClicked ? "translate-y-100" : "-translate-y-50"
-            }`}
-          >
-            <EmojiPicker
-              className="bg-background"
-              autoFocusSearch
-              lazyLoadEmojis={true}
-              onEmojiClick={(e) => {
-                onMessageChange(message + e.emoji);
+        {!isVoiceMode && (
+          <div className="flex items-center gap-5 pr-5">
+            <button
+              className="p-1 rounded-md cursor-pointer hover:bg-sky-300 hover:text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                onIsAreaClickedChange(!isAreaClicked);
               }}
-            />
+              type="button"
+            >
+              <LucideSmile size={20} />
+            </button>
+
+            <div
+              ref={emojiRef}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              className={`-bottom-[145px] fixed transition-transform duration-500 ease-in-out bg-background z-50 ${
+                isAreaClicked ? "translate-y-100" : "-translate-y-50"
+              }`}
+            >
+              <EmojiPicker
+                className="bg-background"
+                autoFocusSearch
+                lazyLoadEmojis
+                onEmojiClick={(e) => {
+                  onMessageChange(message + e.emoji);
+                }}
+              />
+            </div>
+
+            <FileModal openShare={openShare} setOpenShare={onOpenShareChange} />
           </div>
-          <FileModal openShare={openShare} setOpenShare={onOpenShareChange} />
-        </div>
+        )}
+
         <input
           type="text"
           className="text-foreground grow px-2 py-1 h-full outline-none placeholder:text-gray-400"
