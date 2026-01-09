@@ -11,6 +11,9 @@ export const markAuthFailed = () => {
   authFailed = true;
 };
 
+const isRefreshRequest = (url?: string) =>
+  url?.includes("/users/refresh-token");
+
 export const isAuthFailed = () => authFailed;
 
 export const hasAccessToken = () =>
@@ -36,7 +39,15 @@ const onTokenRefreshed = (newAccessToken: string) => {
 api.interceptors.request.use(
   (config) => {
     if (isAuthFailed()) {
-      return Promise.reject(new axios.Cancel("Auth failed, request blocked"));
+      const isPublic =
+        config.url?.includes("/users/register") ||
+        config.url?.includes("/users/send-otp") ||
+        config.url?.includes("/users/verify-otp") ||
+        config.url?.includes("/users/login");
+
+      if (!isPublic) {
+        return Promise.reject(new axios.Cancel("Auth failed, request blocked"));
+      }
     }
 
     const accessToken = localStorage.getItem("tapo_accessToken");
@@ -47,7 +58,9 @@ api.interceptors.request.use(
       config.url?.includes("/users/send-otp") ||
       config.url?.includes("/users/verify-otp") ||
       config.url?.includes("/users/login") ||
-      config.url?.includes("/users/refresh-token");
+      config.url?.includes("/users/refresh-token") ||
+      config.url?.includes("https://api.cloudinary.com/v1_1/") ||
+      config.url?.includes("/upload/sign");
 
     if (!accessToken) {
       if (isPublic) return config;
@@ -112,12 +125,13 @@ api.interceptors.response.use(
       originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
       return api(originalRequest);
     } catch (err) {
-      markAuthFailed();
-      localStorage.removeItem("tapo_accessToken");
-      window.location.href = "/"; // hard redirect
+      if (isRefreshRequest(originalRequest?.url)) {
+        markAuthFailed();
+        localStorage.removeItem("tapo_accessToken");
+        location.href = "/";
+      }
+
       return Promise.reject(err);
-    } finally {
-      isRefreshing = false;
     }
   }
 );

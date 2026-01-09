@@ -11,7 +11,7 @@ const AddMembers = ({
   return (
     <>
       {selectedContacts && selectedContacts.length > 0 && (
-        <div className="px-3 space-y-3">
+        <div className="px-3 space-y-3 bg-background text-foreground">
           <h2 className="underline">Selected contacts</h2>
           <div className="flex gap-2 overflow-x-auto">
             {selectedContacts.map((contact) => (
@@ -20,7 +20,7 @@ const AddMembers = ({
           </div>
         </div>
       )}
-      <div>
+      <div className="bg-background text-foreground">
         {alphabets.map(
           (alphabet) =>
             alphabet.contacts?.length > 0 && (
@@ -28,14 +28,13 @@ const AddMembers = ({
                 <h2 className="text-lg font-bold">
                   {alphabet.contacts?.length > 0 && alphabet.name}
                 </h2>
-                <ul className="space-y-3 mb-3">
+                <ul className="space-y-3 mb-3 bg-background">
                   {alphabet.contacts &&
                     alphabet.contacts.length > 0 &&
                     alphabet.contacts.map((contact) => (
                       <li
-                        className="flex justify-between items-center bg-white p-2 rounded-lg border"
-                        key={contact._id}
-                      >
+                        className="flex justify-between items-center p-2 rounded-lg border"
+                        key={contact._id}>
                         <label className="w-full" htmlFor={contact._id}>
                           {contact.localName}
                         </label>

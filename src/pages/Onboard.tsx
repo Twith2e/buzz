@@ -46,12 +46,25 @@ export default function Onboard() {
     try {
       let profilePicUrl = null;
       if (profilePicFile) {
-        const signData = await getCloudinarySignature("profile-pics");
-        const uploadResponse = await uploadFileToCloudinary(
-          profilePicFile,
-          signData
-        );
-        profilePicUrl = uploadResponse.secure_url;
+        const formData = new FormData();
+        formData.append("file", profilePicFile);
+        formData.append("upload_preset", "avatar_unsigned");
+
+        const upload = await fetch(
+          `https://api.cloudinary.com/v1_1/${
+            import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+          }/image/upload`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        )
+          .then((res) => res.json())
+          .catch(() => {})
+          .finally(() => {
+            setIsLoading(false);
+          });
+        profilePicUrl = upload?.secure_url || null;
       }
 
       console.log(data.displayName);
@@ -86,13 +99,11 @@ export default function Onboard() {
           </h2>
           <form
             className="flex flex-col gap-3 w-full items-center font-sans"
-            onSubmit={handleSubmit(onSubmit)}
-          >
+            onSubmit={handleSubmit(onSubmit)}>
             <label htmlFor="">Profile Picture</label>
             <label
               className="border border-gray-400 rounded-full h-40 w-40 flex items-center justify-center cursor-pointer overflow-hidden"
-              htmlFor="profile-picture"
-            >
+              htmlFor="profile-picture">
               {profilePicPreview ? (
                 <img
                   src={profilePicPreview}
@@ -114,8 +125,7 @@ export default function Onboard() {
             <div className="wrapper-custom">
               <label
                 htmlFor="display-name"
-                className="label-custom flex gap-2 items-center"
-              >
+                className="label-custom flex gap-2 items-center">
                 Display Name
                 <span>
                   <IoIosInformationCircle
@@ -139,8 +149,7 @@ export default function Onboard() {
             </div>
             <button
               className="bg-sky-300 py-2 px-3 rounded-md text-white font-sans disabled:bg-blue-200 w-full flex justify-center mt-3 cursor-pointer hover:opacity-90"
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               {isLoading ? (
                 <div className="h-6 w-6 border-2 border-t-brandSky border-blue-300 animate-spin rounded-full"></div>
               ) : (

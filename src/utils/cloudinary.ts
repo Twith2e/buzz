@@ -1,4 +1,3 @@
-import axios from "axios";
 import api from "./api";
 import { CloudinaryUploadResponse } from "./types";
 
@@ -52,7 +51,7 @@ export async function uploadFileToCloudinary(
   }
 
   try {
-    const response = await axios.post(url, formData);
+    const response = await api.post(url, formData);
     return response.data;
   } catch (error: any) {
     console.error(

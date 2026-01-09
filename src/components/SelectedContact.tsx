@@ -21,7 +21,7 @@ const SelectedContact = ({ id }: { id: string }) => {
           <LucideUser />
         )}
       </div>
-      <p className="text-sm font-medium text-gray-900">
+      <p className="text-sm font-medium text-foreground">
         {contact?.localName || contact?.contactProfile.displayName}
       </p>
     </div>
