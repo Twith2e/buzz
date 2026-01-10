@@ -12,10 +12,10 @@ import api from "./api";
 export type RegisterForFcmResult = string | null;
 
 export interface RegisterOptions {
-  serverUrl: string; // base URL of your backend, e.g. "https://api.example.com"
-  jwt: string; // auth token, Bearer-style token passed to backend
-  vapidKey: string; // VAPID public key (base64 url-safe)
-  platform?: string; // optional platform id, defaults to "web"
+  serverUrl: string;
+  jwt: string;
+  vapidKey: string;
+  platform?: string;
 }
 
 /**
@@ -40,7 +40,10 @@ export async function registerForFCM(
   firebaseConfig: Record<string, any>,
   opts: RegisterOptions
 ): Promise<RegisterForFcmResult> {
-  const { serverUrl, jwt, vapidKey, platform = "web" } = opts;
+  const isPWA =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as any).standalone === true;
+  const { jwt, vapidKey, platform = isPWA ? "pwa" : "web" } = opts;
 
   // Basic environment checks
   if (typeof window === "undefined") {

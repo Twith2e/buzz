@@ -58,7 +58,6 @@ export default function ChatUI() {
     sentMessages,
     setUsersOnline,
     usersOnline,
-    conversationTitle,
     selectedMessageId,
     setSelectedMessageId,
     selectedImage,
@@ -66,6 +65,7 @@ export default function ChatUI() {
     currentConversation,
     hasMore,
     cursor,
+    isFetchingMessage,
     setConversations,
   } = useConversationContext();
   const { startCall, callState } = useWebRTC();
@@ -141,7 +141,6 @@ export default function ChatUI() {
 
   // State derived from data
   const isGroup = false;
-  const isLoadingMessages = !sentMessages || sentMessages.length === 0;
   const participantNames = currentConvo
     ? currentConvo.participants.map((p: any) => {
         if (p._id === user._id) return "You";
@@ -343,9 +342,7 @@ export default function ChatUI() {
             selectedImage={selectedImage}
             selectedDoc={selectedDoc}
           />
-
           <ChatHeader
-            conversationTitle={conversationTitle}
             onBack={back}
             onVideoCall={() => {
               startCall(
@@ -372,8 +369,7 @@ export default function ChatUI() {
           {menu.open && (
             <div
               className="fixed z-50 bg-white border shadow rounded text-sm transform -translate-x-full -translate-y-1/2"
-              style={{ top: menu.top, left: menu.left }}
-            >
+              style={{ top: menu.top, left: menu.left }}>
               <MessageMenu
                 message={menu.message}
                 setSelectedTag={setSelectedTag}
@@ -385,8 +381,7 @@ export default function ChatUI() {
           <div
             className="flex-1 overflow-y-auto p-4 flex flex-col gap-3"
             ref={containerRef}
-            onClick={() => menu.open && setMenu({ ...menu, open: false })}
-          >
+            onClick={() => menu.open && setMenu({ ...menu, open: false })}>
             {fetchingOlderMessages && (
               <div className="flex items-center justify-center w-full py-2">
                 <Loader size={16} className="animate-spin" />
@@ -397,7 +392,7 @@ export default function ChatUI() {
             )}
             <MessageList
               messages={sentMessages}
-              isLoading={isLoadingMessages}
+              isLoading={isFetchingMessage}
               roomId={roomId}
               currentUserId={user._id}
               contactList={contactList}

@@ -1,9 +1,8 @@
 import { LucideArrowLeft, LucidePhone, LucideVideo } from "lucide-react";
-import ConversationTitle from "./ConversationTitle";
 import { formatLastSeen } from "@/lib/utils";
+import { useConversationContext } from "@/contexts/ConversationContext";
 
 interface ChatHeaderProps {
-  conversationTitle: string;
   onBack: () => void;
   onVideoCall: () => void;
   onAudioCall: () => void;
@@ -16,7 +15,6 @@ interface ChatHeaderProps {
 }
 
 export function ChatHeader({
-  conversationTitle,
   onBack,
   onVideoCall,
   onAudioCall,
@@ -27,6 +25,7 @@ export function ChatHeader({
   userLastSeen,
   showBackButton = true,
 }: ChatHeaderProps) {
+  const { conversationTitle } = useConversationContext();
   return (
     <header className="top-0 right-0 w-full bg-background dark:bg-matteBlack text-foreground p-3 h-16 border-b flex items-center justify-between z-10">
       <div className="flex items-center gap-2">
@@ -36,9 +35,7 @@ export function ChatHeader({
           </button>
         )}
         <div className="flex flex-col gap-2">
-          <span>
-            <ConversationTitle title={conversationTitle} />
-          </span>
+          <span>{conversationTitle}</span>
           <span className="text-xs">
             {isGroup && participantNames.length > 0 ? (
               participantNames.join(", ")
@@ -58,16 +55,14 @@ export function ChatHeader({
         <button
           className="cursor-pointer hover:text-sky-300"
           type="button"
-          onClick={onVideoCall}
-        >
+          onClick={onVideoCall}>
           <LucideVideo size={20} />
         </button>
         <button
           className="cursor-pointer hover:text-sky-300"
           type="button"
           disabled={isCallDisabled}
-          onClick={onAudioCall}
-        >
+          onClick={onAudioCall}>
           <LucidePhone size={18} />
         </button>
       </div>

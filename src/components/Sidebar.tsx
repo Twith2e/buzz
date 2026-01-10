@@ -12,15 +12,13 @@ const Sidebar = () => {
         expanded
           ? "w-60 absolute left-0 bg-background h-screen top-0 z-10"
           : "w-14"
-      }`}
-    >
+      }`}>
       <div>
         <button
           aria-label="collapse-and-expand-button"
           onClick={() => setExpanded(!expanded)}
           title={expanded ? "Collapse" : "Expand"}
-          className="flex justify-center items-center mb-4 px-3"
-        >
+          className="flex justify-center items-center mb-4 px-3">
           <LucideMenu size={25} />
         </button>
 

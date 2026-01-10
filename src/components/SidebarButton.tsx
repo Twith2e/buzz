@@ -32,10 +32,9 @@ export default function SidebarButton({
       onClick={handleClick}
       key={id}
       className={`${
-        isActive ? "bg-primary text-primary-foreground" : ""
-      } flex items-center hover:bg-primary hover:text-primary-foreground cursor-pointer w-full px-3 py-[.7rem] transition-[color] duration-100`}
-      title={text}
-    >
+        isActive ? "bg-foreground text-background" : ""
+      } flex items-center hover:bg-foreground hover:text-background cursor-pointer w-full px-3 py-[.7rem] transition-[color] duration-100`}
+      title={text}>
       <span className={`shrink-0`}>
         <Icon size={24} />
       </span>
@@ -43,11 +42,8 @@ export default function SidebarButton({
       <div
         className={`overflow-hidden transition-[width,opacity] duration-300 ${
           expanded ? "opacity-100 w-auto ml-3" : "opacity-0 w-0"
-        }`}
-      >
-        <span className={`text-${color} font-sans text-xs text-nowrap`}>
-          {text}
-        </span>
+        }`}>
+        <span className={`font-sans text-xs text-nowrap`}>{text}</span>
       </div>
     </button>
   );

@@ -1,14 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { otpSchema, OtpSchema } from "../schemas/Otp.schema";
+import { otpSchema } from "../schemas/Otp.schema";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { OTPInput } from "input-otp";
 import FakeDash from "../components/FakeDash";
 import Slot from "../components/Slot";
 import api from "@/utils/api";
 import { VerifyOtpResponse } from "@/utils/types";
+import { toast } from "sonner";
 
 export default function OtpPage() {
   const [otp, setOtp] = useState("");
@@ -31,7 +31,7 @@ export default function OtpPage() {
     try {
       const response = await api.post("/users/send-otp", { email: id });
       if (response.status === 200) {
-        alert("otp resent!");
+        toast.info("otp resent!");
       }
       setCooldown(30);
     } catch (error) {
@@ -98,8 +98,7 @@ export default function OtpPage() {
           <div
             className={`w-full flex flex-col items-center p-4 rounded-lg border-2 transition-colors ${
               error ? "border-red-500 bg-white" : "border-gray-200 bg-white"
-            }`}
-          >
+            }`}>
             <OTPInput
               maxLength={6}
               value={otp}
@@ -142,8 +141,7 @@ export default function OtpPage() {
                 <button
                   className="font-normal text-blue-500 hover:text-blue-600 transition-colors disabled:text-gray-300 disabled:cursor-not-allowed"
                   disabled={cooldown > 0 || isLoading}
-                  onClick={handleResendOTP}
-                >
+                  onClick={handleResendOTP}>
                   {cooldown > 0 ? `RESEND OTP (${cooldown})` : "RESEND OTP"}
                 </button>
               </span>

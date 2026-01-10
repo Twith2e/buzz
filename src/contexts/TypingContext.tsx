@@ -33,11 +33,6 @@ export const TypingProvider = ({
 
   const handleTypingReceived = useCallback(
     (receivedUserId: string, typing: boolean) => {
-      console.log("[TypingContext] Received typing event:", {
-        receivedUserId,
-        typing,
-      });
-
       // Clear any existing timer for this user
       const existingTimer = clearTimers.current.get(receivedUserId);
       if (existingTimer) {
@@ -83,12 +78,10 @@ export const TypingProvider = ({
   });
 
   const setUserTyping = useCallback((typing: boolean) => {
-    console.log("[TypingContext] setUserTyping:", typing);
     setIsUserTyping(typing);
   }, []);
 
   const setConversationIdWrapper = useCallback((id: string) => {
-    console.log("[TypingContext] setConversationId:", id);
     setConversationId(id);
   }, []);
 
@@ -98,8 +91,7 @@ export const TypingProvider = ({
         typingUsers,
         setUserTyping,
         setConversationId: setConversationIdWrapper,
-      }}
-    >
+      }}>
       {children}
     </TypingContext.Provider>
   );

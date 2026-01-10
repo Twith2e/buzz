@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "react-query";
 import api from "@/utils/api";
 import { Contact } from "@/utils/types";
+import { useConversationContext } from "@/contexts/ConversationContext";
 
 type UpsertPayload = {
   email: string;
@@ -23,6 +24,8 @@ async function upsertContactApi(payload: UpsertPayload): Promise<Contact> {
 }
 
 export function useUpsertContact() {
+  const { conversationTitle, setConversationTitle } = useConversationContext();
+
   const queryClient = useQueryClient();
 
   return useMutation(upsertContactApi, {
@@ -32,6 +35,13 @@ export function useUpsertContact() {
 
       const previousContacts = queryClient.getQueryData<Contact[]>(["contact"]);
 
+      if (
+        conversationTitle &&
+        conversationTitle.toLowerCase() === payload.email.toLowerCase() &&
+        payload.firstName
+      ) {
+        setConversationTitle(payload.firstName);
+      }
       queryClient.setQueryData<Contact[]>(["contact"], (old) => {
         if (!old) return old;
 

@@ -20,25 +20,19 @@ import useSearchEmail from "@/hooks/useSearchEmail";
 import { MessageResponse } from "@/utils/types";
 import api from "@/utils/api";
 import AddMembers from "./CreateGroup";
+import { computedTitle } from "@/lib/utils";
 
 const NewChatButton = () => {
   const { fetchingContactList, contacts } = useContact();
-  const { createConversation, setSentMessages, roomId, setConversationTitle } =
-    useConversationContext();
+  const {
+    createConversation,
+    setSentMessages,
+    setConversationTitle,
+    setIsFetchingMessage,
+  } = useConversationContext();
   const [open, setOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState(false);
-  const { result, handleSearch, isSearching, error } = useSearchEmail();
-
-  async function fetchConvoMessages(convoId: string) {
-    try {
-      const response = await api.get<MessageResponse>(
-        `/messages/fetch/${convoId}`
-      );
-      setSentMessages(response.data.messages);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const { result, handleSearch, isSearching } = useSearchEmail();
 
   return (
     <>
@@ -64,8 +58,7 @@ const NewChatButton = () => {
             <DropdownMenuItem
               onSelect={() => {
                 setOpen(true);
-              }}
-            >
+              }}>
               <div className="flex gap-2 items-center">
                 <LucideCircleUserRound />
                 <span>New contact</span>
@@ -75,8 +68,7 @@ const NewChatButton = () => {
             <DropdownMenuItem
               onSelect={() => {
                 setOpenGroup(true);
-              }}
-            >
+              }}>
               <div className="flex gap-2 items-center">
                 <LucideGroup />
                 <span>New Group</span>
@@ -94,13 +86,14 @@ const NewChatButton = () => {
             ) : result ? (
               <>
                 <div
-                  className="flex gap-2 items-center"
+                  className="flex gap-2 items-center cursor-pointer hover:bg-accent 
+                  p-2"
                   onClick={() => {
-                    setConversationTitle(result.email || "");
+                    setConversationTitle(
+                      computedTitle(undefined, undefined, result)
+                    );
                     createConversation(result.email || "", result._id || "");
-                    fetchConvoMessages(roomId || "");
-                  }}
-                >
+                  }}>
                   {result.profilePic ? (
                     <img
                       src={result.profilePic}
@@ -110,7 +103,7 @@ const NewChatButton = () => {
                   ) : (
                     <LucideCircleUserRound />
                   )}
-                  <span className="text-sm">
+                  <span className="text-sm cursor-pointer">
                     {contacts.find((contact) => contact.email === result.email)
                       ?.localName || result.email}
                   </span>
@@ -118,10 +111,11 @@ const NewChatButton = () => {
               </>
             ) : contacts && contacts.length ? (
               contacts.map((contact) => (
-                <DropdownMenuItem key={contact._id}>
+                <DropdownMenuItem className="cursor-pointer" key={contact._id}>
                   <div className="flex gap-2 items-center">
                     {contact.contactProfile?.profilePic ? (
                       <img
+                        className="w-8 h-8 rounded-full"
                         src={contact.contactProfile?.profilePic}
                         alt={contact.localName}
                       />

@@ -35,6 +35,8 @@ type ConversationContextType = {
   setConversationTitle: (title: string) => void;
   conversations: Conversation[] | null;
   isLoading: boolean;
+  isFetchingMessage: boolean;
+  setIsFetchingMessage: Dispatch<SetStateAction<boolean>>;
   setConversations: Dispatch<SetStateAction<Conversation[] | null>>;
   selectedMessageId: string | null;
   setSelectedMessageId: Dispatch<SetStateAction<string | null>>;
@@ -82,6 +84,8 @@ const ConversationContext = createContext<ConversationContextType>({
   setConversationTitle: () => {},
   conversations: null,
   isLoading: false,
+  isFetchingMessage: false,
+  setIsFetchingMessage: () => {},
   setConversations: () => {},
   selectedMessageId: null,
   setSelectedMessageId: () => {},
@@ -146,6 +150,7 @@ export default function ConversationContextProvider({
   const { user } = useUserContext();
   const queryClient = useQueryClient();
   const [roomId, setRoomId] = useState("");
+  const [isFetchingMessage, setIsFetchingMessage] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
   const [contact, setContact] = useState<string | null>(null);
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -263,6 +268,8 @@ export default function ConversationContextProvider({
         setConversationTitle,
         conversations,
         isLoading,
+        isFetchingMessage,
+        setIsFetchingMessage,
         setConversations,
         selectedMessageId,
         setSelectedMessageId,
@@ -276,8 +283,7 @@ export default function ConversationContextProvider({
         setHasMore,
         cursor,
         setCursor,
-      }}
-    >
+      }}>
       {children}
     </ConversationContext.Provider>
   );

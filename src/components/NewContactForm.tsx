@@ -5,7 +5,6 @@ import { Loader } from "lucide-react";
 import { useState } from "react";
 import { NewContactSchema, newContactSchema } from "@/schemas/NewContact";
 import { useUpsertContact } from "@/hooks/useUpsertContact";
-import { useUserContext } from "@/contexts/UserContext";
 
 const NewContactForm = ({
   open,
@@ -31,8 +30,6 @@ const NewContactForm = ({
     },
   });
 
-  const { contactList } = useUserContext();
-
   function onSubmit(data: NewContactSchema) {
     setAddingContact(true);
 
@@ -45,14 +42,13 @@ const NewContactForm = ({
       {
         onSuccess: () => {
           setOpen(false);
-          console.log(contactList);
         },
         onSettled: () => {
-          setAddingContact(false); // stop loading spinner
+          setAddingContact(false);
         },
         onError: (err) => {
           console.error(err);
-          setAddingContact(false); // stop spinner even on error
+          setAddingContact(false);
         },
       }
     );
@@ -67,8 +63,7 @@ const NewContactForm = ({
             <div
               className={`flex gap-2 items-center border rounded-lg border-b-3 px-2 ${
                 errors.email ? "border-b-red-500" : ""
-              }`}
-            >
+              }`}>
               <input
                 className="h-10 text-sm outline-none w-full"
                 placeholder="Enter contact email"
@@ -115,8 +110,7 @@ const NewContactForm = ({
           <div className="flex gap-2 items-center mt-3">
             <button
               className="h-8 px-2 text-sm outline-none w-full bg-sky-500 text-white rounded-md"
-              disabled={addingContact}
-            >
+              disabled={addingContact}>
               {addingContact ? (
                 <div className="flex gap-2 items-center text-sm justify-center">
                   <Loader className="animate-spin" />

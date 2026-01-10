@@ -1,4 +1,4 @@
-import { Contact, Conversation, Participant } from "@/utils/types";
+import { Contact, Conversation, Participant, User } from "@/utils/types";
 import { clsx, type ClassValue } from "clsx";
 import { PixelCrop } from "react-image-crop";
 import { twMerge } from "tailwind-merge";
@@ -178,13 +178,16 @@ export function getCroppedBlobFromImage(
 }
 
 export function computedTitle(
-  conversation: Conversation,
-  userContact: Contact | null,
-  otherUser: Participant | null
+  conversation?: Conversation,
+  userContact?: Contact | null,
+  otherUser?: Participant | Partial<User> | null
 ): string {
-  return conversation.title !== ""
-    ? conversation.title
-    : userContact?.localName || otherUser?.email;
+  const convoTitle =
+    conversation?.title && conversation.title.trim().length > 0
+      ? conversation.title
+      : null;
+
+  return convoTitle || userContact?.localName || otherUser?.email || null;
 }
 
 export const getWaveformWidth = (duration?: number) => {

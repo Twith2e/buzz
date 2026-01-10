@@ -35,7 +35,6 @@ export function MessageList({
   currentConversation,
 }: MessageListProps) {
   const { typingUsers } = useTypingContext();
-  const { contactList: userContactList } = useUserContext();
   if (isLoading && roomId) {
     return <MessageSkeleton />;
   }
@@ -116,8 +115,7 @@ export function MessageList({
               data-from={typeof m.from === "string" ? m.from : m.from?._id}
               data-ts={m.ts}
               ref={registerMessageRef(m._id || m.id || m.ts)}
-              className="mb-2"
-            >
+              className="mb-2">
               <Message
                 id={m._id || m.id || m.ts}
                 message={m.message}

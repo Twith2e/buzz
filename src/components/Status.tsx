@@ -221,18 +221,17 @@ const Status = () => {
           onSend={handleSend}
         />
       )}
-      <div className="flex h-screen bg-white">
+      <div className="flex h-screen bg-background text-foreground">
         {isMobile ? <BottomBar /> : <Sidebar />}
         <div className={`flex-1 flex flex-col ${isMobile ? "pb-16" : ""}`}>
-          <div className="px-6 py-4 flex justify-between items-center bg-gray-50 border-b border-gray-100">
-            <h1 className="text-2xl font-bold text-gray-800">Updates</h1>
+          <div className="px-6 py-4 flex justify-between items-center border-b border-gray-100">
+            <h1 className="text-2xl font-bold">Updates</h1>
             <div className="flex gap-4">
               <label
                 htmlFor="status-camera-header"
-                className="cursor-pointer p-2 rounded-full hover:bg-gray-200 transition-colors"
-                title="Add status"
-              >
-                <LucideCamera size={20} className="text-gray-600" />
+                className="cursor-pointer p-2 rounded-full hover:bg-foreground hover:text-background transition-colors"
+                title="Add status">
+                <LucideCamera size={20} />
                 <input
                   type="file"
                   name="status-camera-header"
@@ -246,13 +245,12 @@ const Status = () => {
           </div>
 
           <div className="p-6 overflow-y-auto">
-            <h2 className="text-lg font-bold mb-4 text-gray-800">Status</h2>
+            <h2 className="text-lg font-bold mb-4">Status</h2>
 
             {/* My Status Row */}
             <div
-              className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-50 cursor-pointer -mx-2 transition-colors group"
-              onClick={() => myLastStatus && setViewingStatus(status.mine)}
-            >
+              className="flex items-center gap-4 p-2 rounded-lg hover:bg-background/20 cursor-pointer -mx-2 transition-colors group"
+              onClick={() => myLastStatus && setViewingStatus(status.mine)}>
               <StatusRing
                 count={status.mine.length}
                 viewed={false}
@@ -260,8 +258,8 @@ const Status = () => {
                 displayName={user?.displayName}
               />
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">My Status</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="font-semibold">My Status</h3>
+                <p className="text-sm text-gray-500 mt-1">
                   {myLastStatus
                     ? formatTime(myLastStatus.createdAt)
                     : "Tap to add status update"}
@@ -298,8 +296,7 @@ const Status = () => {
                       <div
                         key={s._id}
                         className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-50 cursor-pointer -mx-2 transition-colors"
-                        onClick={() => setViewingStatus(s.statuses)}
-                      >
+                        onClick={() => setViewingStatus(s.statuses)}>
                         <StatusRing
                           count={s.statuses.length}
                           displayName={displayName}

@@ -26,8 +26,7 @@ const WelcomePage = () => {
             <Link
               to="/signup"
               className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-              aria-label="Get started with Tapo"
-            >
+              aria-label="Get started with Tapo">
               <img src="/tapo-call-image.png" alt="" className="h-5 w-5" />
               Get started
             </Link>
@@ -115,12 +114,6 @@ const WelcomePage = () => {
           <p className="text-sm text-gray-500">
             © {new Date().getFullYear()} Tapo. All rights reserved.
           </p>
-          <a
-            href="/login"
-            className="text-sm text-indigo-600 hover:text-indigo-700"
-          >
-            Already have an account? Sign in
-          </a>
         </div>
       </footer>
     </main>
