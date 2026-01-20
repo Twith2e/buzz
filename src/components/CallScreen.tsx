@@ -1,11 +1,20 @@
 import { useRef, useEffect } from "react";
 import { useWebRTC } from "@/contexts/WebRTCContext";
-import { PhoneOff, Mic, MicOff, Video, VideoOff } from "lucide-react";
+import {
+  PhoneOff,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  LucideUser,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useUserContext } from "@/contexts/UserContext";
 
 export default function CallScreen() {
   const { localStream, remoteStream, callState, endCall, callType, peerId } =
     useWebRTC();
+  const { contactList } = useUserContext();
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -28,7 +37,7 @@ export default function CallScreen() {
     if (remoteVideoRef.current && remoteStream) {
       console.log(
         "Attaching remote stream to video/audio element",
-        remoteStream.getTracks()
+        remoteStream.getTracks(),
       );
       remoteVideoRef.current.srcObject = remoteStream;
 
@@ -60,8 +69,28 @@ export default function CallScreen() {
           />
         ) : (
           <div className="flex flex-col items-center gap-4">
-            <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-3xl font-semibold">
-              {peerId?.slice(0, 3).toUpperCase()}
+            <div className="h-32 w-32 rounded-full flex items-center justify-center">
+              {contactList.find((contact) => contact.email === peerId) ? (
+                <img
+                  className="h-full w-full rounded-full"
+                  src={
+                    contactList.find((contact) => contact.email === peerId)
+                      .contactProfile.profilePic
+                  }
+                  alt={
+                    contactList.find((contact) => contact.email === peerId)
+                      .contactProfile.displayName
+                  }
+                />
+              ) : (
+                <LucideUser className="h-full w-full rounded-full border" />
+              )}
+            </div>
+            <div className="flex items-center justify-center text-3xl font-semibold">
+              {contactList.find((contact) => contact.email === peerId)
+                ? contactList.find((contact) => contact.email === peerId)
+                    .localName
+                : peerId}
             </div>
             <div className="text-xl">
               {callState === "connected" ? "Connected" : "Calling..."}
@@ -99,8 +128,7 @@ export default function CallScreen() {
           variant="ghost"
           size="icon"
           className="rounded-full hover:bg-gray-700 text-white"
-          onClick={localVideoRef.current?.muted ? muteMic : unmuteMic}
-        >
+          onClick={localVideoRef.current?.muted ? muteMic : unmuteMic}>
           {localVideoRef.current?.muted ? (
             <MicOff className="h-6 w-6" />
           ) : (
@@ -112,8 +140,7 @@ export default function CallScreen() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full hover:bg-gray-700 text-white"
-          >
+            className="rounded-full hover:bg-gray-700 text-white">
             <Video className="h-6 w-6" />
           </Button>
         )}
@@ -122,8 +149,7 @@ export default function CallScreen() {
           variant="destructive"
           size="icon"
           className="w-14 h-14 rounded-full"
-          onClick={endCall}
-        >
+          onClick={endCall}>
           <PhoneOff className="h-6 w-6" />
         </Button>
       </div>

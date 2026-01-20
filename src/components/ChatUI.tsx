@@ -136,7 +136,7 @@ export default function ChatUI() {
   // Data fetching
   const { data: conversations } = useGetConversations();
   const currentConvo = conversations?.find(
-    (c: any) => c._id === roomId || c.roomId === roomId
+    (c: any) => c._id === roomId || c.roomId === roomId,
   );
 
   // State derived from data
@@ -148,7 +148,7 @@ export default function ChatUI() {
           (c: any) =>
             c.contactProfile?._id === p._id ||
             c._id === p._id ||
-            c.email === p.email
+            c.email === p.email,
         );
         return match ? match.localName : p.email;
       })
@@ -156,7 +156,7 @@ export default function ChatUI() {
 
   let replyMessage = selectedMessageId
     ? (sentMessages || []).find(
-        (m: any) => (m._id || m.id) === selectedMessageId
+        (m: any) => (m._id || m.id) === selectedMessageId,
       )
     : selectedTag;
 
@@ -301,7 +301,7 @@ export default function ChatUI() {
     const container = containerRef.current;
     if (!container) return;
     const target = container.querySelector(
-      `div[data-id="${messageId}"]`
+      `div[data-id="${messageId}"]`,
     ) as HTMLElement | null;
     if (!target) return;
     const tRect = target.getBoundingClientRect();
@@ -347,15 +347,15 @@ export default function ChatUI() {
             onVideoCall={() => {
               startCall(
                 currentConversation.participants.find((p) => p._id !== user._id)
-                  ?._id,
-                "video"
+                  ?.email,
+                "video",
               );
             }}
             onAudioCall={() => {
               startCall(
                 currentConversation.participants.find((p) => p._id !== user._id)
-                  ?._id,
-                "audio"
+                  ?.email,
+                "audio",
               );
             }}
             isCallDisabled={callState !== "idle"}

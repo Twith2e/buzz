@@ -14,6 +14,20 @@ export const markAuthFailed = () => {
 const isRefreshRequest = (url?: string) =>
   url?.includes("/users/refresh-token");
 
+const isPublicRequest = (url?: string) => {
+  const u = url || "";
+  return (
+    u.includes("/users/register") ||
+    u.includes("/users/send-otp") ||
+    u.includes("/users/verify-otp") ||
+    u.includes("/users/login") ||
+    u.includes("/users/logout") ||
+    u.includes("/users/refresh-token") ||
+    u.includes("https://api.cloudinary.com/v1_1/") ||
+    u.includes("/upload/sign")
+  );
+};
+
 export const isAuthFailed = () => authFailed;
 
 export const hasAccessToken = () =>
@@ -38,29 +52,13 @@ const onTokenRefreshed = (newAccessToken: string) => {
  */
 api.interceptors.request.use(
   (config) => {
-    if (isAuthFailed()) {
-      const isPublic =
-        config.url?.includes("/users/register") ||
-        config.url?.includes("/users/send-otp") ||
-        config.url?.includes("/users/verify-otp") ||
-        config.url?.includes("/users/login");
+    const isPublic = isPublicRequest(config.url);
 
-      if (!isPublic) {
-        return Promise.reject(new axios.Cancel("Auth failed, request blocked"));
-      }
+    if (isAuthFailed() && !isPublic) {
+      return Promise.reject(new axios.Cancel("Auth failed, request blocked"));
     }
 
     const accessToken = localStorage.getItem("tapo_accessToken");
-
-    // Public endpoints (explicit)
-    const isPublic =
-      config.url?.includes("/users/register") ||
-      config.url?.includes("/users/send-otp") ||
-      config.url?.includes("/users/verify-otp") ||
-      config.url?.includes("/users/login") ||
-      config.url?.includes("/users/refresh-token") ||
-      config.url?.includes("https://api.cloudinary.com/v1_1/") ||
-      config.url?.includes("/upload/sign");
 
     if (!accessToken) {
       if (isPublic) return config;

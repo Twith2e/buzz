@@ -112,7 +112,7 @@ const WelcomePage = () => {
       <footer className="px-6 py-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} Tapo. All rights reserved.
+            &copy; {new Date().getFullYear()} Tapo. All rights reserved.
           </p>
         </div>
       </footer>
