@@ -87,7 +87,6 @@ export default function ChatUI() {
     emit,
     setSentMessages,
     setUsersOnline,
-    setConversations,
   });
 
   const shouldFocus = !(
@@ -369,7 +368,8 @@ export default function ChatUI() {
           {menu.open && (
             <div
               className="fixed z-50 bg-white border shadow rounded text-sm transform -translate-x-full -translate-y-1/2"
-              style={{ top: menu.top, left: menu.left }}>
+              style={{ top: menu.top, left: menu.left }}
+            >
               <MessageMenu
                 message={menu.message}
                 setSelectedTag={setSelectedTag}
@@ -379,9 +379,10 @@ export default function ChatUI() {
           )}
 
           <div
-            className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 mt-16"
+            className="flex-1 overflow-y-auto p-4 flex flex-col gap-3"
             ref={containerRef}
-            onClick={() => menu.open && setMenu({ ...menu, open: false })}>
+            onClick={() => menu.open && setMenu({ ...menu, open: false })}
+          >
             {fetchingOlderMessages && (
               <div className="flex items-center justify-center w-full py-2">
                 <Loader size={16} className="animate-spin" />

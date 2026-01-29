@@ -27,7 +27,7 @@ export function ChatHeader({
 }: ChatHeaderProps) {
   const { conversationTitle } = useConversationContext();
   return (
-    <header className="fixed top-0 right-0 w-full bg-background dark:bg-matteBlack text-foreground p-3 h-16 border-b flex items-center justify-between z-10">
+    <header className="sticky top-0 left-0 right-0 bg-background dark:bg-matteBlack text-foreground p-3 h-16 border-b flex items-center justify-between z-10">
       <div className="flex items-center gap-2">
         {showBackButton && (
           <button onClick={onBack} className="md:hidden text-foreground">
@@ -44,8 +44,8 @@ export function ChatHeader({
                 {userOnlineStatus
                   ? "Online"
                   : userLastSeen
-                  ? `Last seen ${formatLastSeen(userLastSeen)}`
-                  : ""}
+                    ? `Last seen ${formatLastSeen(userLastSeen)}`
+                    : ""}
               </>
             )}
           </span>
@@ -55,14 +55,16 @@ export function ChatHeader({
         <button
           className="cursor-pointer hover:text-sky-300"
           type="button"
-          onClick={onVideoCall}>
+          onClick={onVideoCall}
+        >
           <LucideVideo size={20} />
         </button>
         <button
           className="cursor-pointer hover:text-sky-300"
           type="button"
           disabled={isCallDisabled}
-          onClick={onAudioCall}>
+          onClick={onAudioCall}
+        >
           <LucidePhone size={18} />
         </button>
       </div>

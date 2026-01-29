@@ -57,7 +57,7 @@ export function MessageList({
   const getLocalDateKey = (date: Date) =>
     `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
       2,
-      "0"
+      "0",
     )}-${String(date.getDate()).padStart(2, "0")}`;
 
   for (const m of sortedMessages) {
@@ -115,7 +115,8 @@ export function MessageList({
               data-from={typeof m.from === "string" ? m.from : m.from?._id}
               data-ts={m.ts}
               ref={registerMessageRef(m._id || m.id || m.ts)}
-              className="mb-2">
+              className="mb-2"
+            >
               <Message
                 id={m._id || m.id || m.ts}
                 message={m.message}
@@ -146,7 +147,7 @@ export function MessageList({
                     (c: any) =>
                       c.contactProfile?._id === ownerId ||
                       c._id === ownerId ||
-                      (!!ownerEmail && c.email === ownerEmail)
+                      (!!ownerEmail && c.email === ownerEmail),
                   );
                   if (match) return match.localName;
                   return ownerEmail || ownerId || "";
@@ -180,7 +181,7 @@ export function MessageList({
                     typeof m.from === "object" ? m.from : null;
                   const contact = (contactList || []).find(
                     (c) =>
-                      c.contactProfile?._id === senderId || c._id === senderId
+                      c.contactProfile?._id === senderId || c._id === senderId,
                   );
 
                   return (
