@@ -379,7 +379,7 @@ export default function ChatUI() {
           )}
 
           <div
-            className="flex-1 overflow-y-auto p-4 flex flex-col gap-3"
+            className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 mt-16 md:mt-0"
             ref={containerRef}
             onClick={() => menu.open && setMenu({ ...menu, open: false })}
           >
