@@ -14,6 +14,12 @@ interface UseInputFocusProps {
 function canAutoFocus() {
   if (typeof window === "undefined") return false;
 
+  // Explicitly block mobile devices
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+  if (isMobile) return false;
+
   return (
     window.matchMedia("(pointer: fine)").matches &&
     window.matchMedia("(hover: hover)").matches

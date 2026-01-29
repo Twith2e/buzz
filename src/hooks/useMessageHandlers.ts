@@ -1,13 +1,12 @@
 import { useEffect } from "react";
 import { formatAttachments } from "@/lib/utils";
-import type { ChatMessage, Conversation } from "@/utils/types";
+import type { ChatMessage } from "@/utils/types";
 
 interface UseMessageHandlersProps {
   on: ((event: string, handler: (data: any) => void) => () => void) | null;
   roomId: string;
   emit: (event: string, data: any) => void;
   setSentMessages: (fn: (prev: any) => ChatMessage[]) => void;
-  setConversations: (fn: (prev: Conversation[]) => Conversation[]) => void;
   setUsersOnline: (fn: (prev: any) => any) => void;
 }
 
@@ -17,7 +16,6 @@ export function useMessageHandlers({
   emit,
   setSentMessages,
   setUsersOnline,
-  setConversations,
 }: UseMessageHandlersProps) {
   // Handle incoming messages
   useEffect(() => {
@@ -47,34 +45,6 @@ export function useMessageHandlers({
       setSentMessages((prev: any) => {
         const base = Array.isArray(prev) ? (prev as ChatMessage[]) : [];
         return [...base, normalized];
-      });
-
-      setConversations((prev: any) => {
-        if (!prev) return prev;
-        const targetIndex = prev.findIndex(
-          (c: any) => c.roomId === roomId || c._id === roomId
-        );
-        if (targetIndex === -1) return prev;
-
-        const updatedConversation = {
-          ...prev[targetIndex],
-          lastMessage: {
-            ...prev[targetIndex].lastMessage,
-            from: normalized.from,
-            message:
-              normalized.message ||
-              (normalized.attachments ? "Attachment" : ""),
-            ts: new Date().toISOString(),
-            status: "sending",
-          },
-          updatedAt: new Date().toISOString(),
-        };
-
-        const newConversations = [...prev];
-        newConversations.splice(targetIndex, 1);
-        newConversations.unshift(updatedConversation);
-
-        return newConversations;
       });
 
       emit("message:received", {
@@ -135,11 +105,6 @@ export function useMessageHandlers({
         online: boolean;
         lastSeen?: string;
       }) => {
-        console.log("[presence:update] Received:", {
-          userId,
-          online,
-          lastSeen,
-        });
         setUsersOnline((prev) => {
           const idx = prev.findIndex((u) => u._id === userId);
           if (idx === -1) return [...prev, { _id: userId, online, lastSeen }];
@@ -153,5 +118,11 @@ export function useMessageHandlers({
     return off;
   }, [on, setUsersOnline]);
 
-  // Removed manual presence:update emit as it is handled by socket connection and visibility events in useSocket.tsx
+  // Emit presence update for current user
+  useEffect(() => {
+    emit("presence:update", {
+      online: true,
+      lastSeen: new Date().toISOString(),
+    });
+  }, [roomId, emit]);
 }

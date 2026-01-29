@@ -189,7 +189,7 @@ export type CloudinaryUploadResponse = {
       format: string;
       url: string;
       secure_url: string;
-    }
+    },
   ];
   api_key: string;
 };
