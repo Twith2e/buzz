@@ -80,20 +80,20 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
   const { containerRef } = useReadObserver({ emit, userId: user?._id, roomId });
   const idx =
     fileType === "doc"
-      ? selectedDoc?.currentIndex ?? 0
-      : selectedImage?.currentIndex ?? 0;
+      ? (selectedDoc?.currentIndex ?? 0)
+      : (selectedImage?.currentIndex ?? 0);
   const file =
     fileType === "doc"
-      ? selectedDoc?.docs?.[idx] ?? null
-      : selectedImage?.images?.[idx] ?? null;
+      ? (selectedDoc?.docs?.[idx] ?? null)
+      : (selectedImage?.images?.[idx] ?? null);
   const files =
     fileType === "doc"
       ? Array.isArray(selectedDoc?.docs)
         ? (selectedDoc!.docs as Array<File>)
         : []
       : Array.isArray(selectedImage?.images)
-      ? (selectedImage!.images as Array<File>)
-      : [];
+        ? (selectedImage!.images as Array<File>)
+        : [];
 
   const originalsRef = useRef<Map<number, File>>(new Map());
 
@@ -112,11 +112,11 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
 
   const isImage = useMemo(
     () => !!file && file.type.startsWith("image/"),
-    [file]
+    [file],
   );
   const isVideo = useMemo(
     () => !!file && file.type.startsWith("video/"),
-    [file]
+    [file],
   );
 
   const onCropChange = (pixelCrop: PixelCrop, percentCrop: PercentCrop) => {
@@ -317,8 +317,8 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
             const kind: "image" | "video" | "doc" = f.type.startsWith("image/")
               ? "image"
               : f.type.startsWith("video/")
-              ? "video"
-              : "doc";
+                ? "video"
+                : "doc";
             return {
               type: kind,
               url: URL.createObjectURL(f),
@@ -359,12 +359,12 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
               }>;
               for (const f of files) {
                 const kind: "image" | "video" | "doc" = f.type.startsWith(
-                  "image/"
+                  "image/",
                 )
                   ? "image"
                   : f.type.startsWith("video/")
-                  ? "video"
-                  : "doc";
+                    ? "video"
+                    : "doc";
                 const sign = await getCloudinarySignature(`chats/${roomId}`);
                 const data = await uploadFileToCloudinary(f, sign);
                 const url: string = data.secure_url || data.url;
@@ -418,7 +418,7 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
           >
             <EmojiPicker
               autoFocusSearch
-              lazyLoadEmojis={true}
+              skinTonesDisabled
               onEmojiClick={(e) => {
                 setMessage((prev) => ({ ...prev, text: prev.text + e.emoji }));
               }}

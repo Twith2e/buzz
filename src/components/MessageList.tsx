@@ -99,7 +99,7 @@ export function MessageList({
   return (
     <>
       {groups.map((g) => (
-        <div key={g.date}>
+        <div key={g.items[0].ts}>
           <div className="flex items-center my-3">
             <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
             <div className="px-3 text-xs text-gray-500">

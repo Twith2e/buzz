@@ -27,8 +27,8 @@ export function ChatHeader({
 }: ChatHeaderProps) {
   const { conversationTitle } = useConversationContext();
   return (
-    <div className="w-full relative">
-      <header className="fixed lg:sticky top-0 left-0 right-0 bg-background dark:bg-matteBlack text-foreground p-3 h-16 border-b flex items-center justify-between z-10">
+    <div className="w-full">
+      <header className="sticky top-0 w-full bg-background dark:bg-matteBlack text-foreground p-3 h-16 border-b flex items-center justify-between z-10">
         <div className="flex items-center gap-2">
           {showBackButton && (
             <button onClick={onBack} className="md:hidden text-foreground">

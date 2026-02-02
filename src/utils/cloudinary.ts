@@ -1,4 +1,5 @@
 import api from "./api";
+import axios from "axios";
 import { CloudinaryUploadResponse } from "./types";
 
 export async function getCloudinarySignature(folder?: string) {
@@ -13,7 +14,7 @@ export async function getCloudinarySignature(folder?: string) {
 
 export async function uploadFileToCloudinary(
   file: File,
-  signData: Record<string, string | number>
+  signData: Record<string, string | number>,
 ): Promise<CloudinaryUploadResponse> {
   const mime = file.type || "";
   const ext =
@@ -21,18 +22,18 @@ export async function uploadFileToCloudinary(
   const resourceType = mime.startsWith("image/")
     ? "image"
     : mime.startsWith("video/")
-    ? "video"
-    : ext === "pdf" ||
-      ext === "csv" ||
-      ext === "txt" ||
-      ext === "doc" ||
-      ext === "docx" ||
-      ext === "ppt" ||
-      ext === "pptx" ||
-      ext === "xls" ||
-      ext === "xlsx"
-    ? "raw"
-    : "raw";
+      ? "video"
+      : ext === "pdf" ||
+          ext === "csv" ||
+          ext === "txt" ||
+          ext === "doc" ||
+          ext === "docx" ||
+          ext === "ppt" ||
+          ext === "pptx" ||
+          ext === "xls" ||
+          ext === "xlsx"
+        ? "raw"
+        : "raw";
   const url = `https://api.cloudinary.com/v1_1/${
     import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
   }/${resourceType}/upload`;
@@ -51,12 +52,12 @@ export async function uploadFileToCloudinary(
   }
 
   try {
-    const response = await api.post(url, formData);
+    const response = await axios.post(url, formData);
     return response.data;
   } catch (error: any) {
     console.error(
       "Error uploading file to Cloudinary:",
-      error?.response?.data || error
+      error?.response?.data || error,
     );
     throw error;
   }

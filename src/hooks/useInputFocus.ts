@@ -21,6 +21,9 @@ function canAutoFocus() {
     );
   if (isMobile) return false;
 
+  // Also block on small screens (e.g. resized desktop)
+  if (window.innerWidth < 768) return false;
+
   return (
     window.matchMedia("(pointer: fine)").matches &&
     window.matchMedia("(hover: hover)").matches

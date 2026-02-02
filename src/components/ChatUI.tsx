@@ -330,7 +330,7 @@ export default function ChatUI() {
   const userOnlineStatus = userOnlineInfo?.online;
   const userLastSeen =
     userOnlineInfo?.lastSeen ||
-    contactList?.find((c) => c.email === email)?.contactProfile.lastSeen ||
+    contactList?.find((c) => c.email === email)?.contactProfile?.lastSeen ||
     "";
 
   return (
@@ -379,7 +379,7 @@ export default function ChatUI() {
           )}
 
           <div
-            className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 mt-16 md:mt-0"
+            className="flex-1 overflow-y-auto p-4 flex flex-col gap-3"
             ref={containerRef}
             onClick={() => menu.open && setMenu({ ...menu, open: false })}
           >

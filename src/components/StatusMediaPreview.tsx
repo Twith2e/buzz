@@ -79,6 +79,7 @@ const StatusMediaPreview = ({
                 <EmojiPicker
                   onEmojiClick={(e) => setCaption((prev) => prev + e.emoji)}
                   theme={"dark" as any}
+                  skinTonesDisabled
                 />
                 <div
                   className="fixed inset-0 z-40"

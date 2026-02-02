@@ -105,7 +105,7 @@ export function ChatForm({
                     {ra.slice(0, 3).map((a: any, i: number) => {
                       const isVideo = /^(mp4|webm|ogg)$/i.test(a.format || "");
                       const isImage = /^(jpg|jpeg|png|gif|webp)$/i.test(
-                        a.format || ""
+                        a.format || "",
                       );
                       return (
                         <div
@@ -175,7 +175,7 @@ export function ChatForm({
               <EmojiPicker
                 className="bg-background"
                 autoFocusSearch
-                lazyLoadEmojis
+                skinTonesDisabled
                 onEmojiClick={(e) => {
                   onMessageChange(message + e.emoji);
                 }}

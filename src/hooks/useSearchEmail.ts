@@ -6,7 +6,7 @@ import { isValidEmail } from "@/utils/validation";
 
 export default function useSearchEmail() {
   const { filterContacts } = useContact();
-  const [result, setResult] = useState<Partial<User> | null>(null);
+  const [result, setResult] = useState<FindContactResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -20,10 +20,10 @@ export default function useSearchEmail() {
       timeout = setTimeout(async () => {
         try {
           const response = await api.get<FindContactResponse>(
-            `/users/find/?email=${email}`
+            `/users/find/?email=${email}`,
           );
           if (response.data.matched) {
-            setResult(response.data.user);
+            setResult(response.data);
           } else {
             setResult(null);
           }

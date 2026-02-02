@@ -61,6 +61,7 @@ export type AddContactResponse = {
 export type FindContactResponse = {
   matched: boolean;
   user: Partial<User>;
+  conversationId: string;
 };
 
 export type Participant = {

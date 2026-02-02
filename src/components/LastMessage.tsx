@@ -45,12 +45,12 @@ const LastMessage = ({ message }: { message: Conversation["lastMessage"] }) => {
     type === "image"
       ? "Image"
       : type === "video"
-      ? "Video"
-      : type === "audio"
-      ? "Audio"
-      : type === "document"
-      ? "Document"
-      : "";
+        ? "Video"
+        : type === "audio"
+          ? "Audio"
+          : type === "document"
+            ? "Document"
+            : "";
 
   return (
     <span className="text-xs text-[#AAA] flex items-center gap-1 shrink-0">
@@ -61,7 +61,7 @@ const LastMessage = ({ message }: { message: Conversation["lastMessage"] }) => {
       ) : type === "audio" ? (
         <LucideAudioLines size={12} />
       ) : (
-        <LucideFile size={12} />
+        type === "document" && <LucideFile size={12} />
       )}
       {message.message ? message.message : defaultText}
     </span>

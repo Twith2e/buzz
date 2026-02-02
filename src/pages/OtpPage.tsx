@@ -59,7 +59,7 @@ export default function OtpPage() {
       });
       if (response && response.status === 200) {
         console.log(response);
-        setEmail(response.data.hashedEmail);
+        setEmail(response.data.email);
         if (response.data.isNewUser) {
           navigate(`/complete-registration/${response.data.email}`);
         } else {
@@ -79,26 +79,27 @@ export default function OtpPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      <div className="hidden md:flex w-1/2 bg-[#33BEE7] justify-center items-center">
-        <h1 className="font-bold text-4xl text-white font-rubik">JOIN US</h1>
-      </div>
-      <div className="md:w-1/2 flex flex-col justify-center items-center py-6 lg:py-0 px-4">
-        <div className="w-full max-w-md flex flex-col justify-center items-center">
-          <h2 className="text-xl lg:text-2xl font-bold mb-6 text-gray-800 font-rubik">
-            ENTER VERIFICATION CODE
-          </h2>
-          <p className="text-center text-xs mb-6 text-gray-600">
-            Kindly input the 6-digit OTP has been sent to <br />
-            <span className="text-gray-700 font-medium">
-              {email || (id && `${id.substring(0, 5)}...`)}
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white border border-gray-200 shadow-xl rounded-2xl p-8 space-y-8 animate-in fade-in zoom-in duration-500">
+        <div className="flex flex-col items-center text-center space-y-2">
+          <img src="/logo.png" alt="Buzz Logo" className="w-12 h-12 mb-4" />
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+            Verify your identity
+          </h1>
+          <p className="text-sm text-gray-600">
+            Enter the 6-digit code we sent to{" "}
+            <span className="font-medium text-gray-900">
+              {email || (id ? `${id.substring(0, 5)}...` : "your email")}
             </span>
           </p>
+        </div>
 
+        <div className="space-y-6">
           <div
-            className={`w-full flex flex-col items-center p-4 rounded-lg border-2 transition-colors ${
-              error ? "border-red-500 bg-white" : "border-gray-200 bg-white"
-            }`}>
+            className={`w-full flex justify-center p-4 rounded-lg bg-gray-50 border transition-all duration-200 ${
+              error ? "border-red-500 bg-red-50" : "border-gray-200"
+            }`}
+          >
             <OTPInput
               maxLength={6}
               value={otp}
@@ -107,10 +108,10 @@ export default function OtpPage() {
                 setError("");
               }}
               onComplete={onSubmit}
-              containerClassName="group flex items-center"
+              containerClassName="group flex items-center justify-center gap-2"
               render={({ slots }) => (
                 <>
-                  <div className="flex">
+                  <div className="flex gap-2">
                     {slots.slice(0, 3).map((slot, idx) => (
                       <Slot key={idx} {...slot} />
                     ))}
@@ -118,7 +119,7 @@ export default function OtpPage() {
 
                   <FakeDash />
 
-                  <div className="flex">
+                  <div className="flex gap-2">
                     {slots.slice(3).map((slot, idx) => (
                       <Slot key={idx} {...slot} />
                     ))}
@@ -129,25 +130,29 @@ export default function OtpPage() {
           </div>
 
           {error && (
-            <p className="text-red-600 text-sm font-medium mt-3 text-center">
+            <p className="text-sm font-medium text-red-600 text-center animate-in fade-in slide-in-from-top-1">
               {error}
             </p>
           )}
 
-          <div className="mt-6 relative w-full flex flex-col items-center">
-            <p className="font-sans font-bold text-xs lg:text-sm text-gray-700">
-              Didn't receive the OTP?{" "}
-              <span>
-                <button
-                  className="font-normal text-blue-500 hover:text-blue-600 transition-colors disabled:text-gray-300 disabled:cursor-not-allowed"
-                  disabled={cooldown > 0 || isLoading}
-                  onClick={handleResendOTP}>
-                  {cooldown > 0 ? `RESEND OTP (${cooldown})` : "RESEND OTP"}
-                </button>
-              </span>
-            </p>
+          <div className="flex flex-col items-center space-y-4">
+            <button
+              onClick={handleResendOTP}
+              disabled={cooldown > 0 || isLoading}
+              className="text-sm font-bold text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              {cooldown > 0 ? (
+                <span>Resend code in {cooldown}s</span>
+              ) : (
+                <span>Resend verification code</span>
+              )}
+            </button>
+
             {isLoading && (
-              <div className="mt-3 h-6 w-6 rounded-full border-blue-200 border-3 border-t-blue-400 animate-spin"></div>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="h-4 w-4 rounded-full border-2 border-t-transparent border-blue-600 animate-spin"></div>
+                Verifying...
+              </div>
             )}
           </div>
         </div>

@@ -58,7 +58,7 @@ const CreateGroup = ({
             setConversations((prev) => [...prev, ack.conversation]);
             setOpen(false);
           }
-        }
+        },
       );
     }
   }
@@ -69,7 +69,7 @@ const CreateGroup = ({
         contactList &&
         contactList.length > 0 &&
         contactList.filter((contact) =>
-          contact.localName.toUpperCase().startsWith(alphabet.value)
+          contact.localName.toUpperCase().startsWith(alphabet.value),
         );
     });
   }, [contactList]);
@@ -81,29 +81,33 @@ const CreateGroup = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         hideClose
-        className="max-h-[400px] overflow-y-auto p-0 pb-3 bg-background transition-[height] duration-300 ease-in">
-        <div className="sticky top-0 w-full pt-3 px-3 text-sm">
+        className="max-h-[400px] overflow-y-auto p-0 pb-3 bg-background transition-[height] duration-300 ease-in"
+      >
+        <div className="sticky top-0 w-full pt-3 px-3 text-sm bg-background">
           <h2 className="text-center">Add members</h2>
           <div className="flex justify-between">
             {step === 0 ? (
               <DialogClose asChild>
                 <button
                   type="button"
-                  className="text-sm cursor-pointer hover:bg-accent px-1">
+                  className="text-sm cursor-pointer hover:bg-accent px-1"
+                >
                   Cancel
                 </button>
               </DialogClose>
             ) : (
               <button
                 className="text-sm cursor-pointer hover:bg-accent px-1"
-                onClick={() => setStep(0)}>
+                onClick={() => setStep(0)}
+              >
                 Back
               </button>
             )}
             <button
               className="disabled:text-gray-300 hover cursor-pointer"
               disabled={selectedContacts.length < 1 || step === 1}
-              onClick={() => setStep(1)}>
+              onClick={() => setStep(1)}
+            >
               Next
             </button>
           </div>
@@ -119,7 +123,8 @@ const CreateGroup = ({
             <button
               className="w-full rounded-lg bg-[#007bff] text-white py-2 disabled:bg-gray-300 cursor-pointer hover:bg-[#0056b3]"
               disabled={!title || isCreating}
-              onClick={handleClick}>
+              onClick={handleClick}
+            >
               {isCreating ? (
                 <div className="flex gap-2 items-center justify-center">
                   <span>Creating</span>
@@ -136,7 +141,8 @@ const CreateGroup = ({
                 setSelectedContacts([]);
                 setTitle("");
                 setOpen(false);
-              }}>
+              }}
+            >
               Cancel
             </button>
           </div>

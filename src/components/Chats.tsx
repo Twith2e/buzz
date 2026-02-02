@@ -18,22 +18,16 @@ export default function Chats() {
         <div className="overflow-auto h-full lg:h-full">
           {isLoading
             ? Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 font-sans text-black w-full my-1 hover:bg-gray-100 hover:dark:bg-gray-800 p-2 rounded-md"
-                >
+                <div key={i} className="my-1">
                   <Convo isLoading={true} />
                 </div>
               ))
             : conversations &&
               conversations.length > 0 &&
               conversations.map((conversation) => (
-                <button
-                  key={conversation._id}
-                  className="flex items-center gap-3 font-sans text-black w-full my-1 hover:bg-gray-100 hover:dark:bg-gray-800 p-2 rounded-md"
-                >
+                <div key={conversation._id} className="my-1">
                   <Convo conversation={conversation} isLoading={false} />
-                </button>
+                </div>
               ))}
         </div>
       </div>

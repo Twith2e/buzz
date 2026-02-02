@@ -17,19 +17,33 @@ import useContact from "@/hooks/useContact";
 import { useConversationContext } from "@/contexts/ConversationContext";
 import NewContactForm from "./NewContactForm";
 import useSearchEmail from "@/hooks/useSearchEmail";
-import { MessageResponse } from "@/utils/types";
-import api from "@/utils/api";
 import AddMembers from "./CreateGroup";
 import { computedTitle } from "@/lib/utils";
+import { MessageResponse } from "@/utils/types";
+import api from "@/utils/api";
 
 const NewChatButton = () => {
+  const { setIsFetchingMessage, setHasMore, setCursor, setSentMessages } =
+    useConversationContext();
+  async function fetchConvoMessages(convoId: string) {
+    setIsFetchingMessage(true);
+    try {
+      const response = await api.get<MessageResponse>(
+        `/messages/fetch/${convoId}`,
+      );
+      setHasMore(response.data.hasMore);
+      setCursor(response.data.nextCursor);
+      setSentMessages(response.data.messages);
+    } catch (error) {
+      console.error(error);
+      setSentMessages([]);
+    } finally {
+      setIsFetchingMessage(false);
+    }
+  }
+
   const { fetchingContactList, contacts } = useContact();
-  const {
-    createConversation,
-    setSentMessages,
-    setConversationTitle,
-    setIsFetchingMessage,
-  } = useConversationContext();
+  const { createConversation, setConversationTitle } = useConversationContext();
   const [open, setOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState(false);
   const { result, handleSearch, isSearching } = useSearchEmail();
@@ -38,9 +52,9 @@ const NewChatButton = () => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <div className="relative">
+          <span className="relative" data-coachmark="new-chat">
             <LucidePlus size={24} />
-          </div>
+          </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-80 px-5 pb-5 pt-0 space-y-5 max-h-96 relative bg-background">
           <DropdownMenuGroup className="sticky top-0 left-0 bg-background z-50 pt-3 w-full">
@@ -58,7 +72,8 @@ const NewChatButton = () => {
             <DropdownMenuItem
               onSelect={() => {
                 setOpen(true);
-              }}>
+              }}
+            >
               <div className="flex gap-2 items-center">
                 <LucideCircleUserRound />
                 <span>New contact</span>
@@ -68,7 +83,8 @@ const NewChatButton = () => {
             <DropdownMenuItem
               onSelect={() => {
                 setOpenGroup(true);
-              }}>
+              }}
+            >
               <div className="flex gap-2 items-center">
                 <LucideGroup />
                 <span>New Group</span>
@@ -89,30 +105,57 @@ const NewChatButton = () => {
                   className="flex gap-2 items-center cursor-pointer hover:bg-accent 
                   p-2"
                   onClick={() => {
-                    setConversationTitle(
-                      computedTitle(undefined, undefined, result)
+                    const title = computedTitle(
+                      undefined,
+                      contacts.find(
+                        (contact) => contact.email === result.user.email,
+                      ) || null,
+                      result.user,
                     );
-                    createConversation(result.email || "", result._id || "");
-                  }}>
-                  {result.profilePic ? (
+                    fetchConvoMessages(result.conversationId);
+                    setSentMessages([]);
+                    setConversationTitle(title);
+                    createConversation(
+                      result.user.email || "",
+                      result.user._id || "",
+                    );
+                  }}
+                >
+                  {result.user.profilePic ? (
                     <img
-                      src={result.profilePic}
-                      alt={result.email}
+                      src={result.user.profilePic}
+                      alt={result.user.email}
                       className="w-8 h-8 rounded-full"
                     />
                   ) : (
                     <LucideCircleUserRound />
                   )}
                   <span className="text-sm cursor-pointer">
-                    {contacts.find((contact) => contact.email === result.email)
-                      ?.localName || result.email}
+                    {contacts.find(
+                      (contact) => contact.email === result.user.email,
+                    )?.localName || result.user.email}
                   </span>
                 </div>
               </>
             ) : contacts && contacts.length ? (
               contacts.map((contact) => (
                 <DropdownMenuItem className="cursor-pointer" key={contact._id}>
-                  <div className="flex gap-2 items-center">
+                  <div
+                    className="flex gap-2 items-center"
+                    onClick={() => {
+                      setConversationTitle(
+                        computedTitle(
+                          undefined,
+                          contact,
+                          contact.contactProfile,
+                        ),
+                      );
+                      createConversation(
+                        contact.email || "",
+                        contact._id || "",
+                      );
+                    }}
+                  >
                     {contact.contactProfile?.profilePic ? (
                       <img
                         className="w-8 h-8 rounded-full"

@@ -2,10 +2,9 @@ import { useConversationContext } from "@/contexts/ConversationContext";
 import { useUserContext } from "@/contexts/UserContext";
 import api from "@/utils/api";
 import { Conversation, MessageResponse } from "@/utils/types";
-import { computedTitle, formatTime } from "@/lib/utils";
-import { LucideUser2, LucideUsers } from "lucide-react";
-import LastMessage from "./LastMessage";
+import { computedTitle } from "@/lib/utils";
 import { useNavigation } from "@/contexts/NavigationContext";
+import ConversationItem from "./ConversationItem";
 
 const Convo = ({
   conversation,
@@ -16,6 +15,7 @@ const Convo = ({
 }) => {
   const { user, contactList, fetchingContactList } = useUserContext();
   const {
+    currentConversation,
     enterConversation,
     setSentMessages,
     setConversationTitle,
@@ -46,14 +46,14 @@ const Convo = ({
   const otherUser = conversation.participants.find((u) => u._id !== user?._id);
   if (fetchingContactList) return null;
   const userContact = contactList?.find(
-    (u) => u.contactProfile?._id === otherUser?._id
+    (u) => u.contactProfile?._id === otherUser?._id,
   );
 
   async function fetchConvoMessages(convoId: string) {
     setIsFetchingMessage(true);
     try {
       const response = await api.get<MessageResponse>(
-        `/messages/fetch/${convoId}`
+        `/messages/fetch/${convoId}`,
       );
       setHasMore(response.data.hasMore);
       setCursor(response.data.nextCursor);
@@ -66,69 +66,25 @@ const Convo = ({
     }
   }
 
+  const handleConversationClick = () => {
+    const title = computedTitle(conversation, userContact, otherUser);
+    push("chat");
+    enterConversation(conversation._id);
+    fetchConvoMessages(conversation._id);
+    setCurrentConversation(conversation);
+    setSentMessages([]);
+    setConversationTitle(title);
+  };
+
   return (
-    <>
-      {conversation.lastMessage && (
-        <div
-          key={conversation._id}
-          data-contact-id={otherUser?._id}
-          role="button"
-          tabIndex={0}
-          onClick={() => {
-            const title = computedTitle(conversation, userContact, otherUser);
-            push("chat");
-            enterConversation(conversation._id);
-            fetchConvoMessages(conversation._id);
-            setCurrentConversation(conversation);
-            setSentMessages([]);
-            setConversationTitle(title);
-          }}
-          className="flex items-start w-full px-4 py-2 rounded-lg gap-3 justify-between">
-          <div className="h-14 w-14 rounded-full bg-sky-300 text-white border shadow-sm shrink-0 flex items-center justify-center">
-            {!conversation.creator ? (
-              otherUser?.profilePic ? (
-                <img
-                  src={otherUser.profilePic}
-                  alt="profile"
-                  className="h-full w-full rounded-full object-cover"
-                />
-              ) : (
-                <LucideUser2 size={20} />
-              )
-            ) : (
-              <LucideUsers size={20} />
-            )}
-          </div>
-          <div className="flex flex-col gap-1 items-start min-w-0 flex-1">
-            <span className="truncate text-foreground w-full text-left">
-              {computedTitle(conversation, userContact, otherUser) ||
-                otherUser?.email}
-            </span>
-            <span className="text-xs truncate text-foreground w-full text-left">
-              {conversation.lastMessage ? (
-                conversation.lastMessage.attachments &&
-                conversation.lastMessage.attachments.length > 0 ? (
-                  <LastMessage message={conversation.lastMessage} />
-                ) : (
-                  conversation.lastMessage.message
-                )
-              ) : (
-                conversation.participants.length > 2 &&
-                conversation.creator === user._id &&
-                "You created this group"
-              )}
-            </span>
-          </div>
-          <span className="text-xs whitespace-nowrap shrink-0 text-foreground">
-            {formatTime(
-              conversation.lastMessage
-                ? conversation.lastMessage.ts
-                : conversation.title && conversation.createdAt
-            )}
-          </span>
-        </div>
-      )}
-    </>
+    <ConversationItem
+      conversation={conversation}
+      user={user}
+      otherUser={otherUser}
+      userContact={userContact}
+      isActive={currentConversation?._id === conversation._id}
+      onClick={handleConversationClick}
+    />
   );
 };
 

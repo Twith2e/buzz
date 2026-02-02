@@ -1,6 +1,7 @@
 import { Contact, Conversation, Participant, User } from "@/utils/types";
 import { clsx, type ClassValue } from "clsx";
 import { PixelCrop } from "react-image-crop";
+import { Step } from "react-joyride";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -74,7 +75,7 @@ export function makeClientId(): string {
 
 export function titleCase(text: string): string {
   return text.replace(/\w\S*/g, (w) =>
-    w.replace(/^\w/, (c) => c.toUpperCase())
+    w.replace(/^\w/, (c) => c.toUpperCase()),
   );
 }
 
@@ -153,7 +154,7 @@ export function convertBytesToKb(bytes: number): number {
 
 export function getCroppedBlobFromImage(
   img: HTMLImageElement,
-  crop: PixelCrop
+  crop: PixelCrop,
 ): Promise<Blob> {
   const canvas = document.createElement("canvas");
   const scaleX = img.naturalWidth / img.width;
@@ -170,7 +171,7 @@ export function getCroppedBlobFromImage(
     0,
     0,
     canvas.width,
-    canvas.height
+    canvas.height,
   );
   return new Promise((resolve) => {
     canvas.toBlob((b) => resolve(b!), "image/jpeg");
@@ -180,7 +181,7 @@ export function getCroppedBlobFromImage(
 export function computedTitle(
   conversation?: Conversation,
   userContact?: Contact | null,
-  otherUser?: Participant | Partial<User> | null
+  otherUser?: Participant | Partial<User> | null,
 ): string {
   const convoTitle =
     conversation?.title && conversation.title.trim().length > 0
@@ -198,3 +199,11 @@ export const getWaveformWidth = (duration?: number) => {
   if (duration < 60) return "w-[240px]";
   return "w-[280px]";
 };
+
+export const steps: Step[] = [
+  {
+    target: "[data-coachmark='new-chat']",
+    content: "Start a new conversation here",
+    placement: "bottom",
+  },
+];

@@ -11,15 +11,15 @@ import CallScreen from "@/components/CallScreen";
 import { useNavigation } from "@/contexts/NavigationContext";
 import { Fragment, useEffect, useState } from "react";
 import BottomBar from "@/components/BottomBar";
+import ChatJoyride from "@/components/ChatJoyride";
 
 export default function Dashboard() {
   const { chatAreaRef, setIsAreaClicked, mediaOnboarded } = useUserContext();
   const { setSelectedImage } = useConversationContext();
   const { current } = useNavigation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [mediaDialogOpen, setMediaDialogOpen] = useState<boolean>(
-    !mediaOnboarded
-  );
+  const [mediaDialogOpen, setMediaDialogOpen] =
+    useState<boolean>(!mediaOnboarded);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -34,6 +34,7 @@ export default function Dashboard() {
 
   return (
     <Fragment>
+      <ChatJoyride />
       <Toaster position="bottom-right" />
       {/* Permission dialog */}
       <MediaPermissionUI open={mediaDialogOpen} setOpen={setMediaDialogOpen} />
