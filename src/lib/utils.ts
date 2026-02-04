@@ -90,7 +90,7 @@ export function formatAttachments(att: any): Array<{
   name?: string;
   size?: number;
   duration?: number;
-  filename?: string;
+  fileName?: string;
   height?: number;
   width?: number;
 }> {
@@ -116,10 +116,10 @@ export function formatAttachments(att: any): Array<{
       }
       const url = a.url || a.secure_url || "";
       const format: string = a.format || inferExt(url);
-      const name = a.name ?? a.filename;
+      const name = a.name ?? a.fileName;
       const size = a.size;
       const duration = a.duration;
-      const filename = a.filename;
+      const filename = a.fileName;
       const height = a.height;
       const width = a.width;
       // Include `type` for UI consumption while returning the requested shape
@@ -142,7 +142,7 @@ export function formatAttachments(att: any): Array<{
     name?: string;
     size?: number;
     duration?: number;
-    filename?: string;
+    fileName?: string;
     height?: number;
     width?: number;
   }>;

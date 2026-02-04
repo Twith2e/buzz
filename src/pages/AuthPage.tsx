@@ -24,7 +24,7 @@ export default function AuthPage() {
     try {
       const response = await api.post("/users/send-otp", data);
       if (response && response.status === 200) {
-        console.log(response);
+        localStorage.setItem("buzz_current_email", response.data.email);
         navigate(`/otp/${response.data.hashedEmail}`);
       }
     } catch (error) {

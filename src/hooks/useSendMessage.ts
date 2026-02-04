@@ -48,7 +48,7 @@ export function useSendMessage({
         height?: number;
       }>,
       clientTempId?: string,
-      options?: { skipOptimistic?: boolean }
+      options?: { skipOptimistic?: boolean },
     ) => {
       if (!text && (!attachments || attachments.length === 0)) return;
       if (!initialized || !roomId) {
@@ -66,7 +66,7 @@ export function useSendMessage({
       let tagged: any = null;
       if (selectedMessageId) {
         const found = (sentMessages || []).find(
-          (m: any) => (m._id || m.id) === selectedMessageId
+          (m: any) => (m._id || m.id) === selectedMessageId,
         );
         if (found) {
           tagged = {
@@ -79,7 +79,19 @@ export function useSendMessage({
           };
         }
       }
-      if (!tagged && selectedTag) tagged = selectedTag;
+      if (!tagged && selectedTag) {
+        // Transform selectedTag to use _id instead of id for server compatibility
+        tagged = {
+          _id: (selectedTag as any)._id || (selectedTag as any).id,
+          message: selectedTag.message,
+          from:
+            typeof selectedTag.from === "string"
+              ? { _id: selectedTag.from }
+              : selectedTag.from,
+          attachments: (selectedTag as any).attachments,
+          attachment: (selectedTag as any).attachments,
+        };
+      }
 
       const optimistic: ChatMessage = {
         id: tempId,
@@ -103,18 +115,20 @@ export function useSendMessage({
         setConversations((prev: any) => {
           if (!prev) return prev;
           const targetIndex = prev.findIndex(
-            (c: any) => c.roomId === roomId || c._id === roomId
+            (c: any) => c.roomId === roomId || c._id === roomId,
           );
           if (targetIndex === -1) return prev;
 
           const updatedConversation = {
             ...prev[targetIndex],
             lastMessage: {
-              ...prev[targetIndex].lastMessage,
+              _id: tempId,
+              conversation: roomId,
               from: userId,
-              message: text || (attachments ? "Attachment" : ""),
+              message: text || "",
               ts: new Date().toISOString(),
               status: "sending",
+              attachments: attachments,
             },
             updatedAt: new Date().toISOString(),
           };
@@ -132,7 +146,8 @@ export function useSendMessage({
         roomId,
         message: text || "",
         from: userId,
-        taggedMessage: selectedMessageId ? selectedMessageId : "",
+        // Server expects just the ID to do findById(taggedMessage)
+        taggedMessage: tagged?._id || "",
         attachment: attachments,
       };
 
@@ -144,7 +159,7 @@ export function useSendMessage({
           setSentMessages((prev: any) => {
             if (!Array.isArray(prev)) return prev;
             return prev.map((m: any) =>
-              m.id === tempId ? { ...m, status: "failed" } : m
+              m.id === tempId ? { ...m, status: "failed" } : m,
             );
           });
 
@@ -163,7 +178,7 @@ export function useSendMessage({
           setSentMessages((prev: any) => {
             if (!Array.isArray(prev)) return prev;
             return prev.map((m: any) =>
-              m.id === tempId ? { ...m, status: "failed" } : m
+              m.id === tempId ? { ...m, status: "failed" } : m,
             );
           });
           return;
@@ -174,7 +189,7 @@ export function useSendMessage({
           setSentMessages((prev: any) => {
             if (!Array.isArray(prev)) return prev;
             return prev.map((m: any) =>
-              m.id === tempId ? { ...m, status: "failed" } : m
+              m.id === tempId ? { ...m, status: "failed" } : m,
             );
           });
           return;
@@ -195,13 +210,14 @@ export function useSendMessage({
                 ts: serverPayload.ts || new Date().toISOString(),
                 status: serverPayload.status || "sent",
                 attachments: serverPayload.attachments,
+                taggedMessage: serverPayload.taggedMessage,
               }
             : { ...serverPayload, tempId: clientIdFromServer };
 
         setSentMessages((prev: any) => {
           if (!Array.isArray(prev)) return [normalized];
           const optimisticEntry = (prev as ChatMessage[]).find(
-            (m: any) => m.id === tempId
+            (m: any) => m.id === tempId,
           );
           const merged = {
             ...normalized,
@@ -214,7 +230,7 @@ export function useSendMessage({
               attachments,
           } as ChatMessage;
           return (prev as ChatMessage[]).map((m: ChatMessage) =>
-            m.id === tempId ? merged : m
+            m.id === tempId ? merged : m,
           );
         });
 
@@ -231,7 +247,7 @@ export function useSendMessage({
       emit,
       setSentMessages,
       userId,
-    ]
+    ],
   );
 
   return { sendMessage };

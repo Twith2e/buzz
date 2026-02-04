@@ -118,12 +118,12 @@ export default function ConversationContextProvider({
     refetch,
   } = useGetConversations();
   const [conversations, setConversations] = useState<Conversation[] | null>(
-    null
+    null,
   );
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
-    null
+    null,
   );
   const [selectedImage, setSelectedImage] = useState<{
     images: Array<File> | null;
@@ -180,7 +180,7 @@ export default function ConversationContextProvider({
           queryClient.setQueryData(["conversations"], (prev: any) => {
             const list = Array.isArray(prev) ? prev : [];
             const exists = list.some(
-              (c: any) => c._id === cid || c.roomId === localRoomId
+              (c: any) => c._id === cid || c.roomId === localRoomId,
             );
             if (exists) return list;
             const now = new Date().toISOString();
@@ -224,7 +224,7 @@ export default function ConversationContextProvider({
             return [newConvo, ...list];
           });
         }
-      }
+      },
     );
   }
 
@@ -234,7 +234,7 @@ export default function ConversationContextProvider({
     emit("join:conversation", { roomId });
     // Find and set the current conversation from the list
     const current = conversations?.find(
-      (c: any) => c._id === roomId || c.roomId === roomId
+      (c: any) => c._id === roomId || c.roomId === roomId,
     );
     if (current) {
       setCurrentConversation(current);
@@ -246,6 +246,49 @@ export default function ConversationContextProvider({
     const off = on("chat-initialized", ({ roomId }) => {
       setRoomId(roomId);
       setInitialized(true);
+    });
+    return off;
+  }, [on]);
+
+  // Global listener to update conversation list when any new message arrives
+  useEffect(() => {
+    if (!on) return;
+    const off = on("chat-message", (incoming: any) => {
+      const conversationId = incoming.conversationId || incoming.conversation;
+
+      setConversations((prev) => {
+        if (!prev) return prev;
+        const targetIndex = prev.findIndex(
+          (c: any) => c.roomId === conversationId || c._id === conversationId,
+        );
+        if (targetIndex === -1) return prev;
+
+        const updatedConversation = {
+          ...prev[targetIndex],
+          lastMessage: {
+            _id: incoming.id || incoming._id,
+            conversation: conversationId,
+            from:
+              typeof incoming.from === "string"
+                ? incoming.from
+                : incoming.from?._id,
+            message: incoming.message,
+            ts: incoming.ts,
+            status: incoming.status || "sent",
+            attachments: incoming.attachments || incoming.attachment,
+            createdAt: incoming.ts,
+            updatedAt: incoming.ts,
+            __v: 0,
+          },
+          updatedAt: incoming.ts,
+        };
+
+        const newConversations = [...prev];
+        newConversations.splice(targetIndex, 1);
+        newConversations.unshift(updatedConversation);
+
+        return newConversations;
+      });
     });
     return off;
   }, [on]);
@@ -283,7 +326,8 @@ export default function ConversationContextProvider({
         setHasMore,
         cursor,
         setCursor,
-      }}>
+      }}
+    >
       {children}
     </ConversationContext.Provider>
   );
@@ -293,7 +337,7 @@ export function useConversationContext() {
   const ctx = useContext(ConversationContext);
   if (!ctx) {
     throw new Error(
-      "useConversationContext must be used within a ConversationContextProvider"
+      "useConversationContext must be used within a ConversationContextProvider",
     );
   }
   return ctx;

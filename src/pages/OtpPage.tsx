@@ -42,6 +42,13 @@ export default function OtpPage() {
   }
 
   useEffect(() => {
+    const email = localStorage.getItem("tapo_current_email");
+    if (email) {
+      setEmail(email);
+    }
+  }, []);
+
+  useEffect(() => {
     if (cooldown === 0) return;
     const interval = setInterval(() => {
       setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
@@ -58,8 +65,6 @@ export default function OtpPage() {
         email: id,
       });
       if (response && response.status === 200) {
-        console.log(response);
-        setEmail(response.data.email);
         if (response.data.isNewUser) {
           navigate(`/complete-registration/${response.data.email}`);
         } else {
@@ -71,7 +76,7 @@ export default function OtpPage() {
       const errorMessage =
         error?.response?.data?.message || "Invalid OTP. Please try again.";
       setError(errorMessage);
-      console.log(error);
+      console.error(error);
     } finally {
       reset();
       setIsLoading(false);

@@ -9,33 +9,39 @@ import {
 const LastMessage = ({ message }: { message: Conversation["lastMessage"] }) => {
   let type: string;
 
+  const lastAttachment = message.attachments?.[message.attachments.length - 1];
+  const format = lastAttachment?.format?.toLowerCase() || "";
+  const resourceType = lastAttachment?.resourceType?.toLowerCase() || "";
+
   if (
-    message.attachments &&
-    message.attachments.length > 0 &&
-    (message.attachments[message.attachments.length - 1].format === "jpg" ||
-      message.attachments[message.attachments.length - 1].format === "png" ||
-      message.attachments[message.attachments.length - 1].format === "webp")
+    resourceType === "image" ||
+    format === "jpg" ||
+    format === "jpeg" ||
+    format === "png" ||
+    format === "webp" ||
+    format === "gif"
   ) {
     type = "image";
   } else if (
-    message.attachments &&
-    message.attachments.length > 0 &&
-    message.attachments[message.attachments.length - 1].format === "mp4"
+    resourceType === "video" ||
+    format === "mp4" ||
+    format === "webm" ||
+    format === "mov" ||
+    format === "avi"
   ) {
     type = "video";
   } else if (
-    message.attachments &&
-    message.attachments.length > 0 &&
-    (message.attachments[message.attachments.length - 1].format === "pdf" ||
-      message.attachments[message.attachments.length - 1].format === "doc" ||
-      message.attachments[message.attachments.length - 1].format === "docx")
+    format === "pdf" ||
+    format === "doc" ||
+    format === "docx" ||
+    format === "xlsx" ||
+    format === "xls" ||
+    format === "csv" ||
+    format === "ppt" ||
+    format === "pptx"
   ) {
     type = "document";
-  } else if (
-    message.attachments &&
-    message.attachments.length > 0 &&
-    message.attachments[message.attachments.length - 1].format === "webm"
-  ) {
+  } else if (format === "webm" || format === "mp3" || format === "wav") {
     type = "audio";
   } else {
     type = "text";

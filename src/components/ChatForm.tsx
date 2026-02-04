@@ -175,7 +175,7 @@ export function ChatForm({
               <EmojiPicker
                 className="bg-background"
                 autoFocusSearch
-                skinTonesDisabled
+                lazyLoadEmojis={false}
                 onEmojiClick={(e) => {
                   onMessageChange(message + e.emoji);
                 }}

@@ -77,7 +77,7 @@ export type Attachment = {
   name?: string;
   size?: number;
   duration?: number;
-  filename?: string;
+  fileName?: string;
   height?: number;
   width?: number;
 };

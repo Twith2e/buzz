@@ -314,16 +314,30 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
           if (!files || files.length === 0) return;
           const tempId = makeClientId();
           const optimisticAttachments = files.map((f) => {
-            const kind: "image" | "video" | "doc" = f.type.startsWith("image/")
+            const mime = f.type || "";
+            const ext =
+              (f.name || "").toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] || "";
+            const resourceType = mime.startsWith("image/")
               ? "image"
-              : f.type.startsWith("video/")
+              : mime.startsWith("video/")
                 ? "video"
-                : "doc";
+                : ext === "pdf" ||
+                    ext === "csv" ||
+                    ext === "txt" ||
+                    ext === "doc" ||
+                    ext === "docx" ||
+                    ext === "ppt" ||
+                    ext === "pptx" ||
+                    ext === "xls" ||
+                    ext === "xlsx"
+                  ? "raw"
+                  : "raw";
             return {
-              type: kind,
               url: URL.createObjectURL(f),
-              name: f.name,
-              size: f.size,
+              originalFilename: f.name,
+              bytes: f.size,
+              format: ext,
+              resourceType,
             };
           });
           // local optimistic add (do not emit yet)
@@ -342,6 +356,35 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
                 attachments: optimisticAttachments,
               },
             ];
+          });
+
+          // Optimistic update for conversation list (since skipOptimistic is true in sendMessage)
+          setConversations((prev: any) => {
+            if (!prev) return prev;
+            const targetIndex = prev.findIndex(
+              (c: any) => c.roomId === roomId || c._id === roomId,
+            );
+            if (targetIndex === -1) return prev;
+
+            const updatedConversation = {
+              ...prev[targetIndex],
+              lastMessage: {
+                _id: tempId,
+                conversation: roomId,
+                from: user?._id,
+                message: message.text || "",
+                ts: new Date().toISOString(),
+                status: "sending",
+                attachments: optimisticAttachments,
+              },
+              updatedAt: new Date().toISOString(),
+            };
+
+            const newConversations = [...prev];
+            newConversations.splice(targetIndex, 1);
+            newConversations.unshift(updatedConversation);
+
+            return newConversations;
           });
 
           // upload all to Cloudinary then send final using same tempId
@@ -418,7 +461,7 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
           >
             <EmojiPicker
               autoFocusSearch
-              skinTonesDisabled
+              lazyLoadEmojis={false}
               onEmojiClick={(e) => {
                 setMessage((prev) => ({ ...prev, text: prev.text + e.emoji }));
               }}

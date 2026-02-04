@@ -57,7 +57,7 @@ export default function Settings() {
   };
 
   const handleProfilePicChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -119,7 +119,7 @@ export default function Settings() {
 
           {!fetchingUser && user && (
             <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-800 py-3 relative">
-              <div className="relative">
+              <div className="relative shrink-0">
                 {user.profilePic ? (
                   <img
                     src={user.profilePic}

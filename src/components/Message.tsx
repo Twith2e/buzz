@@ -9,6 +9,10 @@ import {
   LucideInfo,
 } from "lucide-react";
 import { FaFilePdf } from "react-icons/fa";
+import {
+  PiMicrosoftExcelLogoFill,
+  PiMicrosoftPowerpointLogoFill,
+} from "react-icons/pi";
 import type { Message, TaggedMessage } from "@/utils/types";
 import { useUserContext } from "@/contexts/UserContext";
 import { IoDocumentText } from "react-icons/io5";
@@ -191,9 +195,9 @@ const Message = ({
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full text-[8px] flex items-center justify-center text-current/70">
-                                DOC
-                              </div>
+                              <span className="w-full h-full text-[8px] flex items-center justify-center text-current/70">
+                                Doc
+                              </span>
                             )}
                           </div>
                         );
@@ -223,15 +227,15 @@ const Message = ({
                   ? /^(jpg|jpeg|png|gif|webp)$/i.test(fmt)
                     ? "image"
                     : /^(mp4|ogg)$/i.test(fmt)
-                    ? "video"
-                    : /^(webm|wav|mp3|ogg)$/i.test(fmt)
-                    ? "audio"
-                    : "doc"
+                      ? "video"
+                      : /^(webm|wav|mp3|ogg)$/i.test(fmt)
+                        ? "audio"
+                        : "doc"
                   : /\.(jpg|jpeg|png|gif|webp)(\?|#|$)/i.test(url)
-                  ? "image"
-                  : /\.(mp4|ogg|webm)(\?|#|$)/i.test(url)
-                  ? "video"
-                  : "doc";
+                    ? "image"
+                    : /\.(mp4|ogg|webm)(\?|#|$)/i.test(url)
+                      ? "video"
+                      : "doc";
 
                 const fileName = (a as any).fileName || (a as any).name || "";
                 const isVoiceNote =
@@ -252,7 +256,7 @@ const Message = ({
                     ) : t === "image" ? (
                       <ImageAttachment
                         url={url}
-                        alt={a.filename || "attachment"}
+                        alt={a.fileName || "attachment"}
                         className="max-w-[280px] max-h-[300px] w-auto h-auto rounded-lg object-contain bg-black/5"
                       />
                     ) : t === "video" ? (
@@ -272,12 +276,22 @@ const Message = ({
                           <FaFilePdf size={18} className="opacity-70" />
                         ) : a.format === "docx" || a.format === "doc" ? (
                           <IoDocumentText size={18} className="opacity-70" />
+                        ) : a.format === "xlsx" || a.format === "xls" ? (
+                          <PiMicrosoftExcelLogoFill
+                            size={18}
+                            className="opacity-70"
+                          />
+                        ) : a.format === "pptx" || a.format === "ppt" ? (
+                          <PiMicrosoftPowerpointLogoFill
+                            size={18}
+                            className="opacity-70"
+                          />
                         ) : (
                           <LucideFile size={18} className="opacity-70" />
                         )}
                         <div className="flex flex-col">
                           <span className="font-medium truncate max-w-[140px]">
-                            {a.filename || "Document"}
+                            {a.fileName || "Document"}
                           </span>
                           {a.size && (
                             <span className="text-[10px] opacity-70">
@@ -289,7 +303,7 @@ const Message = ({
                     )}
                   </div>
                 );
-              }
+              },
             )}
           </div>
         )}
@@ -300,7 +314,7 @@ const Message = ({
               <span className="text-[11px] font-bold text-orange-500 mb-1">
                 {titleCase(
                   contactList.find((u) => u.contactProfile._id === sender)
-                    ?.localName || sender
+                    ?.localName || sender,
                 )}
               </span>
             )}

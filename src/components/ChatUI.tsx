@@ -216,27 +216,57 @@ export default function ChatUI() {
       const clientTempId = tempId || makeClientId();
       const localUrl = URL.createObjectURL(file);
 
+      const nowIso = new Date().toISOString();
+      const optimisticAttachments = [
+        {
+          url: localUrl,
+          format: file.type.split("/")[1] || "webm",
+          name: file.name,
+          fileName: file.name,
+          size: file.size,
+        },
+      ];
+
       const optimistic: any = {
         id: clientTempId,
         tempId: clientTempId,
         conversationId: roomId,
         from: { _id: user?._id },
         message: "",
-        ts: new Date().toISOString(),
+        ts: nowIso,
         status: "sending",
-        attachments: [
-          {
-            url: localUrl,
-            format: file.type.split("/")[1] || "webm",
-            name: file.name,
-            size: file.size,
-          },
-        ],
+        attachments: optimisticAttachments,
       };
 
       setSentMessages((prev: any) => {
         const base = Array.isArray(prev) ? (prev as any[]) : [];
         return [...base, optimistic];
+      });
+
+      // Optimistic update for conversation list
+      setConversations((prev: any) => {
+        if (!prev) return prev;
+        const targetIndex = prev.findIndex(
+          (c: any) => c.roomId === roomId || c._id === roomId,
+        );
+        if (targetIndex === -1) return prev;
+        const updatedConversation = {
+          ...prev[targetIndex],
+          lastMessage: {
+            _id: clientTempId,
+            conversation: roomId,
+            from: user?._id,
+            message: "",
+            ts: nowIso,
+            status: "sending",
+            attachments: optimisticAttachments,
+          },
+          updatedAt: nowIso,
+        };
+        const newConversations = [...prev];
+        newConversations.splice(targetIndex, 1);
+        newConversations.unshift(updatedConversation);
+        return newConversations;
       });
 
       // upload then send via sendMessage with skipOptimistic
@@ -345,14 +375,14 @@ export default function ChatUI() {
             onBack={back}
             onVideoCall={() => {
               startCall(
-                currentConversation.participants.find((p) => p._id !== user._id)
+                currentConvo.participants.find((p) => p._id !== user._id)
                   ?.email,
                 "video",
               );
             }}
             onAudioCall={() => {
               startCall(
-                currentConversation.participants.find((p) => p._id !== user._id)
+                currentConvo.participants.find((p) => p._id !== user._id)
                   ?.email,
                 "audio",
               );
