@@ -59,6 +59,8 @@ export default function ConversationItem({
       {/* Avatar */}
       <div className="h-14 w-14 rounded-full bg-sky-300 text-white border shadow-sm shrink-0 flex items-center justify-center">
         {!groupChat ? (
+          !contact?.blockedMe &&
+          !contact?.isBlocked &&
           otherUser?.profilePic ? (
             <img
               src={otherUser.profilePic}

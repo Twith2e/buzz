@@ -21,3 +21,14 @@ export async function updateUser(data: {
     throw e;
   }
 }
+
+export async function blockContact(email: string, block: boolean) {
+  try {
+    const response = await api.post(
+      `/users/block-contact?contactEmail=${email}&block=${block}`,
+    );
+    return response.data;
+  } catch (e) {
+    throw e;
+  }
+}

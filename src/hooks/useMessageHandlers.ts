@@ -22,32 +22,23 @@ export function useMessageHandlers({
     if (!on) return;
 
     const handleIncoming = (incoming: any) => {
-      const incomingConversationId =
-        incoming.conversationId || incoming.conversation;
-
-      // ONLY add to message list if message belongs to the current open room
-      if (incomingConversationId !== roomId) {
-        return;
-      }
-
       const normalized: ChatMessage =
         incoming && typeof incoming.from === "string"
           ? {
               id: incoming.id || incoming._id,
-              conversationId: incomingConversationId,
+              conversationId: incoming.conversationId || incoming.conversation,
               from: { _id: incoming.from },
               message: incoming.message,
               ts: incoming.ts,
               status: incoming.status || "sent",
               attachments: formatAttachments(
-                incoming.attachment || incoming.attachments,
+                incoming.attachment || incoming.attachments
               ),
-              taggedMessage: incoming.taggedMessage,
             }
           : {
               ...incoming,
               attachments: formatAttachments(
-                incoming.attachment || incoming.attachments,
+                incoming.attachment || incoming.attachments
               ),
             };
 
@@ -74,7 +65,7 @@ export function useMessageHandlers({
       setSentMessages((prev: any) => {
         if (!Array.isArray(prev)) return prev;
         return (prev as ChatMessage[]).map((m: ChatMessage) =>
-          m.id === messageId ? { ...m, status: "delivered" } : m,
+          m.id === messageId ? { ...m, status: "delivered" } : m
         );
       });
     });
@@ -91,7 +82,7 @@ export function useMessageHandlers({
       setSentMessages((prev: any) => {
         if (!Array.isArray(prev)) return prev;
         return (prev as ChatMessage[]).map((m: ChatMessage) =>
-          m.id === upToId ? { ...m, status: "read" } : m,
+          m.id === upToId ? { ...m, status: "read" } : m
         );
       });
     });
@@ -121,7 +112,7 @@ export function useMessageHandlers({
           next[idx] = { ...next[idx], online, lastSeen };
           return next;
         });
-      },
+      }
     );
 
     return off;

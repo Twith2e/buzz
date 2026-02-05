@@ -159,9 +159,13 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
       <Dialog open={cropping} onOpenChange={setCropping}>
-        <DialogContent hideClose className="w-full max-w-[90vw] h-fit p-4">
+        <DialogContent
+          hideClose
+          className="w-full max-w-[90vw] h-fit p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center justify-between mb-2">
             <button
               type="button"
@@ -180,7 +184,7 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
             </button>
           </div>
           {fileType === "media" && isImage && previewUrl && (
-            <div className="relative w-full max-h-[80vh] bg-black/5 rounded overflow-hidden">
+            <div className="relative w-full max-h-[80vh] bg-background text-foreground rounded overflow-hidden">
               <ReactCrop
                 crop={crop}
                 aspect={4 / 3}
@@ -240,7 +244,7 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
       </div>
 
       {fileType === "media" && isImage && previewUrl && !cropping && (
-        <div className="relative w-full h-64 bg-black/5 rounded overflow-hidden">
+        <div className="relative w-full h-64 bg-background text-foreground rounded overflow-hidden">
           <img
             src={previewUrl ?? ""}
             alt=""
@@ -249,7 +253,7 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
         </div>
       )}
       {fileType === "media" && isVideo && (
-        <div className="relative w-full h-64 bg-black/5 rounded overflow-hidden">
+        <div className="relative w-full h-64 bg-background text-foreground rounded overflow-hidden">
           <video
             src={previewUrl ?? ""}
             controls
@@ -294,14 +298,14 @@ const SelectedFilePreview = ({ fileType }: { fileType: "media" | "doc" }) => {
         </div>
       )}
       {fileType === "doc" && (
-        <div className="text-sm flex flex-col items-center justify-center h-fit space-y-2">
+        <div className="text-sm flex flex-col items-center justify-center h-fit space-y-2 text-background">
           <LucideFile size={40} />
           <span>{file?.name || ""}</span>
           <span>{convertBytesToKb(file?.size)} KB</span>
         </div>
       )}
       <form
-        className="border-t border-brandSky px-2 flex items-center h-8 bg-white rounded-sm"
+        className="border-t border-brandSky px-2 flex items-center h-8 bg-background text-foreground rounded-sm"
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault();

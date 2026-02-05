@@ -1,6 +1,6 @@
 import { useSocketContext } from "../contexts/SocketContext";
 import { useState, useRef, useEffect } from "react";
-import { Loader } from "lucide-react";
+import { Loader, LucideBan } from "lucide-react";
 import { useConversationContext } from "../contexts/ConversationContext";
 import { useUserContext } from "@/contexts/UserContext";
 import { useTypingContext } from "@/contexts/TypingContext";
@@ -11,6 +11,7 @@ import { useSendMessage } from "@/hooks/useSendMessage";
 import { useWebRTC } from "@/contexts/WebRTCContext";
 import { useNavigation } from "@/contexts/NavigationContext";
 import { useMessageHandlers } from "@/hooks/useMessageHandlers";
+import { useQueryClient } from "react-query";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import { useInputFocus } from "@/hooks/useInputFocus";
 import {
@@ -24,6 +25,9 @@ import { ChatForm } from "./ChatForm";
 import { FilePreview } from "./FilePreview";
 import useChatPagination from "@/hooks/useChatPagination";
 import useVoiceRecorder from "@/hooks/useVoiceRecorder";
+import ContactInfo from "./ContactInfo";
+import { blockContact } from "@/services/user/user-service";
+import { toast } from "sonner";
 
 export default function ChatUI() {
   const [openShare, setOpenShare] = useState(false);
@@ -44,6 +48,7 @@ export default function ChatUI() {
     message: string;
     from: any;
   } | null>(null);
+  const [showContactInfo, setShowContactInfo] = useState(false);
 
   // Context hooks
   const { user, contactList, isAreaClicked, setIsAreaClicked } =
@@ -67,6 +72,8 @@ export default function ChatUI() {
     cursor,
     isFetchingMessage,
     setConversations,
+    conversationTitle,
+    setConversationTitle,
   } = useConversationContext();
   const { startCall, callState } = useWebRTC();
   const { back } = useNavigation();
@@ -139,7 +146,7 @@ export default function ChatUI() {
   );
 
   // State derived from data
-  const isGroup = false;
+  const isGroup = currentConvo ? currentConvo.participants.length > 2 : false;
   const participantNames = currentConvo
     ? currentConvo.participants.map((p: any) => {
         if (p._id === user._id) return "You";
@@ -358,108 +365,219 @@ export default function ChatUI() {
 
   const userOnlineInfo = usersOnline.find((u) => u._id === contact);
   const userOnlineStatus = userOnlineInfo?.online;
+  const otherParticipant =
+    currentConvo?.participants.find(
+      (p: any) => user?._id && p._id !== user._id,
+    ) || currentConvo?.participants.find((p: any) => p._id !== user?._id);
+
+  const targetEmail = email || otherParticipant?.email;
+
+  const currentContact = contactList?.find((c) => c.email === targetEmail);
+  const blockedMe = currentContact?.blockedMe || false;
+  const isBlocked = currentContact?.isBlocked || false;
+
   const userLastSeen =
-    userOnlineInfo?.lastSeen ||
-    contactList?.find((c) => c.email === email)?.contactProfile?.lastSeen ||
-    "";
+    userOnlineInfo?.lastSeen || currentContact?.contactProfile?.lastSeen || "";
+
+  useEffect(() => {
+    if (!currentConvo) return;
+
+    let newTitle = "";
+    if (isGroup) {
+      newTitle = currentConvo.title || "Group Chat";
+    } else if (currentContact) {
+      newTitle =
+        currentContact.localName ||
+        currentContact.contactProfile?.displayName ||
+        targetEmail ||
+        "Unknown";
+    }
+
+    if (newTitle && newTitle !== conversationTitle) {
+      setConversationTitle(newTitle);
+    }
+  }, [
+    currentContact?.localName,
+    currentContact?.contactProfile?.displayName,
+    currentConvo?.title,
+    isGroup,
+    conversationTitle,
+    setConversationTitle,
+    targetEmail,
+    currentConvo,
+  ]);
+
+  const queryClient = useQueryClient();
+
+  const handleBlock = async (passedEmail?: string, block: boolean = true) => {
+    const emailToBlock = passedEmail || targetEmail;
+    console.log("handleBlock called with:", {
+      passedEmail,
+      targetEmail,
+      emailToBlock,
+      block,
+    });
+
+    if (!emailToBlock) {
+      toast.error("Could not find contact email to block");
+      return;
+    }
+    try {
+      await blockContact(emailToBlock, block);
+      toast.success(
+        block
+          ? "Contact blocked successfully"
+          : "Contact unblocked successfully",
+      );
+      queryClient.invalidateQueries(["contact"]);
+      setShowContactInfo(false);
+    } catch (err) {
+      console.error("block failed", err);
+      toast.error(
+        block ? "Failed to block contact" : "Failed to unblock contact",
+      );
+    }
+  };
 
   return (
-    <div className="flex flex-col h-full w-full bg-background">
-      {roomId ? (
-        <>
-          <FilePreview
-            selectedImage={selectedImage}
-            selectedDoc={selectedDoc}
-          />
-          <ChatHeader
-            onBack={back}
-            onVideoCall={() => {
-              startCall(
-                currentConvo.participants.find((p) => p._id !== user._id)
-                  ?.email,
-                "video",
-              );
-            }}
-            onAudioCall={() => {
-              startCall(
-                currentConvo.participants.find((p) => p._id !== user._id)
-                  ?.email,
-                "audio",
-              );
-            }}
-            isCallDisabled={callState !== "idle"}
-            isGroup={isGroup}
-            participantNames={participantNames}
-            userOnlineStatus={userOnlineStatus}
-            userLastSeen={userLastSeen}
-            showBackButton
-          />
+    <div className="flex h-full w-full bg-background overflow-hidden">
+      <div className="flex flex-col h-full flex-1 min-w-0 transition-all duration-300">
+        {roomId ? (
+          <>
+            <FilePreview
+              selectedImage={selectedImage}
+              selectedDoc={selectedDoc}
+            />
+            <ChatHeader
+              onBack={back}
+              onVideoCall={() => {
+                const target = currentConvo?.participants.find(
+                  (p: any) => p._id !== user?._id,
+                );
+                if (target?._id) {
+                  startCall(target._id, "video");
+                }
+              }}
+              onAudioCall={() => {
+                const target = currentConvo?.participants.find(
+                  (p: any) => p._id !== user?._id,
+                );
+                if (target?._id) {
+                  startCall(target._id, "audio");
+                }
+              }}
+              onHeaderClick={() => setShowContactInfo(!showContactInfo)}
+              isCallDisabled={callState !== "idle"}
+              isGroup={isGroup}
+              participantNames={participantNames}
+              userOnlineStatus={userOnlineStatus}
+              userLastSeen={userLastSeen}
+              showBackButton
+              blockedMe={blockedMe || isBlocked}
+            />
 
-          {menu.open && (
-            <div
-              className="fixed z-50 bg-white border shadow rounded text-sm transform -translate-x-full -translate-y-1/2"
-              style={{ top: menu.top, left: menu.left }}
-            >
-              <MessageMenu
-                message={menu.message}
-                setSelectedTag={setSelectedTag}
-                setOpen={setMenu}
-              />
-            </div>
-          )}
-
-          <div
-            className="flex-1 overflow-y-auto p-4 flex flex-col gap-3"
-            ref={containerRef}
-            onClick={() => menu.open && setMenu({ ...menu, open: false })}
-          >
-            {fetchingOlderMessages && (
-              <div className="flex items-center justify-center w-full py-2">
-                <Loader size={16} className="animate-spin" />
-                <span className="ml-2 text-xs text-gray-500">
-                  Loading older messages...
-                </span>
+            {menu.open && (
+              <div
+                className="fixed z-50 bg-white border shadow rounded text-sm transform -translate-x-full -translate-y-1/2"
+                style={{ top: menu.top, left: menu.left }}
+              >
+                <MessageMenu
+                  message={menu.message}
+                  setSelectedTag={setSelectedTag}
+                  setOpen={setMenu}
+                />
               </div>
             )}
-            <MessageList
-              messages={sentMessages}
-              isLoading={isFetchingMessage}
-              roomId={roomId}
-              currentUserId={user._id}
-              contactList={contactList}
-              onMessageRightClick={handleMessageRightClick}
-              onTagClick={handleTagClick}
-              onReply={handleReply}
-              containerRef={containerRef}
-              registerMessageRef={registerMessageRef}
-              enrichTaggedMessage={enrichTaggedMessage}
-              currentConversation={currentConversation}
-            />
-          </div>
 
-          <ChatForm
-            message={message}
-            onMessageChange={setMessage}
-            onSubmit={handleSendMessage}
-            openShare={openShare}
-            onOpenShareChange={setOpenShare}
-            isAreaClicked={isAreaClicked}
-            onIsAreaClickedChange={setIsAreaClicked}
-            emojiRef={emojiRef}
-            inputRef={inputRef}
-            isDisabled={!initialized || !connected}
-            replyMessage={replyMessage}
-            onClearReply={handleClearReply}
-            onSendVN={handleSendVoice}
-          />
-        </>
-      ) : (
-        <div className="h-[80%] flex items-center justify-center">
-          <span className="text-gray-400">
-            Please select a contact to start chatting
-          </span>
-        </div>
-      )}
+            <div
+              className="flex-1 overflow-y-auto p-4 flex flex-col gap-3"
+              ref={containerRef}
+              onClick={() => menu.open && setMenu({ ...menu, open: false })}
+            >
+              {fetchingOlderMessages && (
+                <div className="flex items-center justify-center w-full py-2">
+                  <Loader size={16} className="animate-spin" />
+                  <span className="ml-2 text-xs text-gray-500">
+                    Loading older messages...
+                  </span>
+                </div>
+              )}
+              <MessageList
+                messages={sentMessages}
+                isLoading={isFetchingMessage}
+                roomId={roomId}
+                currentUserId={user._id}
+                contactList={contactList}
+                onMessageRightClick={handleMessageRightClick}
+                onTagClick={handleTagClick}
+                onReply={handleReply}
+                containerRef={containerRef}
+                registerMessageRef={registerMessageRef}
+                enrichTaggedMessage={enrichTaggedMessage}
+                currentConversation={currentConversation}
+              />
+
+              {isBlocked && !isGroup && (
+                <div className="absolute inset-x-0 bottom-0 top-0 z-40 flex flex-col items-center justify-center bg-background/60 backdrop-blur-[2px] p-6 text-center animate-in fade-in duration-300">
+                  <div className="bg-card border border-border p-8 rounded-3xl shadow-2xl max-w-sm flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center text-red-500">
+                      <LucideBan size={32} />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold text-foreground">
+                        Contact Blocked
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        You have blocked this contact. Unblock them to send
+                        messages and see their updates.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleBlock(targetEmail, false)}
+                      className="mt-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold transition-all shadow-lg shadow-sky-500/20"
+                    >
+                      Unblock Contact
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {(!isBlocked || isGroup) && (
+              <ChatForm
+                message={message}
+                onMessageChange={setMessage}
+                onSubmit={handleSendMessage}
+                openShare={openShare}
+                onOpenShareChange={setOpenShare}
+                isAreaClicked={isAreaClicked}
+                onIsAreaClickedChange={setIsAreaClicked}
+                emojiRef={emojiRef}
+                inputRef={inputRef}
+                isDisabled={!initialized || !connected}
+                replyMessage={replyMessage}
+                onClearReply={handleClearReply}
+                onSendVN={handleSendVoice}
+              />
+            )}
+          </>
+        ) : (
+          <div className="h-[80%] flex items-center justify-center">
+            <span className="text-gray-400">
+              Please select a contact to start chatting
+            </span>
+          </div>
+        )}
+      </div>
+
+      <ContactInfo
+        isOpen={showContactInfo}
+        onClose={() => setShowContactInfo(false)}
+        otherUser={otherParticipant}
+        conversation={currentConvo}
+        onBlock={handleBlock}
+        isGroup={isGroup}
+      />
     </div>
   );
 }

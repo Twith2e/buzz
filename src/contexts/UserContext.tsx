@@ -46,10 +46,14 @@ export function UserContextProvider({ children }) {
     const path = location.pathname;
 
     const isOnPublicRoute = publicPrefixes.some(
-      (prefix) => path === prefix || path.startsWith(prefix + "/*")
+      (prefix) => path === prefix || path.startsWith(prefix + "/*"),
     );
     if (isOnPublicRoute) {
       navigate("/dashboard", { replace: true });
+    }
+
+    if (user.toured) {
+      localStorage.setItem("tour:chat", "true");
     }
   }, [fetchingUser, user, location.pathname, navigate]);
 

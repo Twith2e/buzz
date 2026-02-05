@@ -6,24 +6,28 @@ interface ChatHeaderProps {
   onBack: () => void;
   onVideoCall: () => void;
   onAudioCall: () => void;
+  onHeaderClick: () => void;
   isCallDisabled: boolean;
   isGroup: boolean;
   participantNames: string[];
   userOnlineStatus: boolean | undefined;
   userLastSeen: string | undefined;
   showBackButton: boolean;
+  blockedMe?: boolean;
 }
 
 export function ChatHeader({
   onBack,
   onVideoCall,
   onAudioCall,
+  onHeaderClick,
   isCallDisabled,
   isGroup,
   participantNames,
   userOnlineStatus,
   userLastSeen,
   showBackButton = true,
+  blockedMe,
 }: ChatHeaderProps) {
   const { conversationTitle } = useConversationContext();
   return (
@@ -35,36 +39,44 @@ export function ChatHeader({
               <LucideArrowLeft size={24} />
             </button>
           )}
-          <div className="flex flex-col gap-2">
-            <span>{conversationTitle}</span>
-            <span className="text-xs">
+          <button
+            onClick={onHeaderClick}
+            className="flex flex-col gap-0.5 items-start hover:bg-muted/50 p-1 px-2 rounded-md transition-colors text-left"
+          >
+            <span className="font-medium">{conversationTitle}</span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
               {isGroup && participantNames.length > 0 ? (
                 participantNames.join(", ")
               ) : (
                 <>
-                  {userOnlineStatus
-                    ? "Online"
-                    : userLastSeen
-                      ? `Last seen ${formatLastSeen(userLastSeen)}`
-                      : ""}
+                  {!blockedMe && (
+                    <>
+                      {userOnlineStatus
+                        ? "Online"
+                        : userLastSeen
+                          ? `Last seen ${formatLastSeen(userLastSeen)}`
+                          : ""}
+                    </>
+                  )}
                 </>
               )}
             </span>
-          </div>
+          </button>
         </div>
         <div className="flex flex-row-reverse items-center gap-4 pr-4">
           <button
-            className="cursor-pointer hover:text-sky-300"
+            className={`cursor-pointer hover:text-sky-300 ${blockedMe ? "opacity-50 cursor-not-allowed" : ""}`}
             type="button"
-            onClick={onVideoCall}
+            onClick={!blockedMe ? onVideoCall : undefined}
+            disabled={blockedMe}
           >
             <LucideVideo size={20} />
           </button>
           <button
-            className="cursor-pointer hover:text-sky-300"
+            className={`cursor-pointer hover:text-sky-300 ${blockedMe || isCallDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
             type="button"
-            disabled={isCallDisabled}
-            onClick={onAudioCall}
+            disabled={isCallDisabled || blockedMe}
+            onClick={!blockedMe ? onAudioCall : undefined}
           >
             <LucidePhone size={18} />
           </button>

@@ -79,19 +79,7 @@ export function useSendMessage({
           };
         }
       }
-      if (!tagged && selectedTag) {
-        // Transform selectedTag to use _id instead of id for server compatibility
-        tagged = {
-          _id: (selectedTag as any)._id || (selectedTag as any).id,
-          message: selectedTag.message,
-          from:
-            typeof selectedTag.from === "string"
-              ? { _id: selectedTag.from }
-              : selectedTag.from,
-          attachments: (selectedTag as any).attachments,
-          attachment: (selectedTag as any).attachments,
-        };
-      }
+      if (!tagged && selectedTag) tagged = selectedTag;
 
       const optimistic: ChatMessage = {
         id: tempId,
@@ -146,8 +134,7 @@ export function useSendMessage({
         roomId,
         message: text || "",
         from: userId,
-        // Server expects just the ID to do findById(taggedMessage)
-        taggedMessage: tagged?._id || "",
+        taggedMessage: tagged || "",
         attachment: attachments,
       };
 
@@ -210,7 +197,6 @@ export function useSendMessage({
                 ts: serverPayload.ts || new Date().toISOString(),
                 status: serverPayload.status || "sent",
                 attachments: serverPayload.attachments,
-                taggedMessage: serverPayload.taggedMessage,
               }
             : { ...serverPayload, tempId: clientIdFromServer };
 

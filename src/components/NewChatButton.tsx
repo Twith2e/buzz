@@ -23,16 +23,25 @@ import { MessageResponse } from "@/utils/types";
 import api from "@/utils/api";
 
 const NewChatButton = () => {
-  const { setIsFetchingMessage, setHasMore, setCursor, setSentMessages } =
-    useConversationContext();
+  const {
+    setIsFetchingMessage,
+    setHasMore,
+    setCursor,
+    setSentMessages,
+    createConversation,
+    setConversationTitle,
+    conversations,
+    enterConversation,
+    setCurrentConversation,
+  } = useConversationContext();
   async function fetchConvoMessages(convoId: string) {
     setIsFetchingMessage(true);
     try {
       const response = await api.get<MessageResponse>(
         `/messages/fetch/${convoId}`,
       );
-      setHasMore(response.data.hasMore);
-      setCursor(response.data.nextCursor);
+      setHasMore?.(response.data.hasMore);
+      setCursor?.(response.data.nextCursor);
       setSentMessages(response.data.messages);
     } catch (error) {
       console.error(error);
@@ -43,7 +52,6 @@ const NewChatButton = () => {
   }
 
   const { fetchingContactList, contacts } = useContact();
-  const { createConversation, setConversationTitle } = useConversationContext();
   const [open, setOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState(false);
   const { result, handleSearch, isSearching } = useSearchEmail();
@@ -101,10 +109,9 @@ const NewChatButton = () => {
               </div>
             ) : result ? (
               <>
-                <div
-                  className="flex gap-2 items-center cursor-pointer hover:bg-accent 
-                  p-2"
-                  onClick={() => {
+                <DropdownMenuItem
+                  className="flex gap-2 items-center cursor-pointer hover:bg-accent p-2"
+                  onSelect={() => {
                     const title = computedTitle(
                       undefined,
                       contacts.find(
@@ -135,27 +142,42 @@ const NewChatButton = () => {
                       (contact) => contact.email === result.user.email,
                     )?.localName || result.user.email}
                   </span>
-                </div>
+                </DropdownMenuItem>
               </>
             ) : contacts && contacts.length ? (
               contacts.map((contact) => (
-                <DropdownMenuItem className="cursor-pointer" key={contact._id}>
-                  <div
-                    className="flex gap-2 items-center"
-                    onClick={() => {
-                      setConversationTitle(
-                        computedTitle(
-                          undefined,
-                          contact,
-                          contact.contactProfile,
-                        ),
-                      );
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  key={contact._id}
+                  onSelect={() => {
+                    const targetUserId = contact.contactProfile?._id;
+                    const existingConvo = conversations?.find(
+                      (c) =>
+                        c.participants.some((p) => p._id === targetUserId) &&
+                        c.participants.length === 2,
+                    );
+
+                    const title = computedTitle(
+                      existingConvo || undefined,
+                      contact,
+                      contact.contactProfile,
+                    );
+                    setConversationTitle(title);
+
+                    if (existingConvo) {
+                      setCurrentConversation(existingConvo);
+                      enterConversation(existingConvo._id);
+                      fetchConvoMessages(existingConvo._id);
+                    } else {
+                      setSentMessages([]);
                       createConversation(
                         contact.email || "",
-                        contact._id || "",
+                        targetUserId || "",
                       );
-                    }}
-                  >
+                    }
+                  }}
+                >
+                  <div className="flex gap-2 items-center">
                     {contact.contactProfile?.profilePic ? (
                       <img
                         className="w-8 h-8 rounded-full"

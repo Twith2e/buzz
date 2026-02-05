@@ -15,7 +15,7 @@ type WebRTCContextType = {
   acceptCall: (
     offer: RTCSessionDescriptionInit,
     from: string,
-    type: CallType
+    type: CallType,
   ) => Promise<void>;
   endCall: () => void;
   rejectCall: () => void;
@@ -52,7 +52,7 @@ const ICE_CONFIG: RTCConfiguration = {
 };
 
 export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
-  const { emit, on } = useSocketContext();
+  const { emit, on, connected } = useSocketContext();
   const { user } = useUserContext();
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -203,7 +203,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
   async function acceptCall(
     offer: RTCSessionDescriptionInit,
     from: string,
-    type: CallType
+    type: CallType,
   ) {
     try {
       setPeerId(from);
@@ -245,6 +245,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
   /* ------------------ SIGNAL HANDLERS ------------------ */
 
   useEffect(() => {
+    if (!connected) return;
     const offIncoming = on("call:incoming", ({ from, type, offer }) => {
       console.log("incoming: ", from, type);
 
@@ -257,7 +258,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
     const offWebRtcOffer = on("webrtc:offer", async ({ from, offer, type }) => {
       setCallState("ringing");
       setIncomingCall((prev) =>
-        prev ? { ...prev, offer } : { from, type, offer }
+        prev ? { ...prev, offer } : { from, type, offer },
       );
       if (pcRef.current) {
         await pcRef.current.setRemoteDescription(offer);
@@ -288,7 +289,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
             candidatesQueue.current.push(candidate);
           }
         }
-      }
+      },
     );
 
     const offCallEnd = on("call:end", () => {
@@ -302,7 +303,7 @@ export const WebRTCProvider = ({ children }: { children: React.ReactNode }) => {
       offIceCandidate();
       offCallEnd();
     };
-  }, [on, peerId, localStream]);
+  }, [on, connected, emit]);
 
   /* ------------------ CLEANUP ------------------ */
 

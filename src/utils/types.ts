@@ -26,6 +26,7 @@ export type User = {
   profilePic: string | null;
   lastSeen: string;
   status: string;
+  toured: boolean;
 };
 
 export type UserResponse = {
@@ -44,6 +45,7 @@ export type Contact = {
     profilePic: string | null;
     lastSeen: string;
   };
+  blockedMe: boolean;
 };
 
 export type ContactListResponse = {
@@ -69,6 +71,7 @@ export type Participant = {
   displayName: string;
   email: string;
   profilePic: string | null;
+  about?: string;
 };
 
 export type Attachment = {

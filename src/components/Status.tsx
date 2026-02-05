@@ -21,7 +21,7 @@ const Status = () => {
   const { user, contactList } = useUserContext();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [viewingStatus, setViewingStatus] = useState<Array<StatusType> | null>(
-    null
+    null,
   );
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -78,7 +78,7 @@ const Status = () => {
             url: story.url,
             resourceType: story.resourceType,
             caption: story.caption,
-            viewers: story.viewers,
+            viewers: story.viewers || [],
             expiresAt: story.expiresAt,
             createdAt: story.createdAt,
             __v: story.__v,
@@ -88,16 +88,22 @@ const Status = () => {
               mine: Array<StatusType>;
               visible: Array<VisibleStatus>;
             }) => {
+              // Deduplicate mine
+              const exists = (prev.mine || []).some(
+                (s) => s._id === status._id,
+              );
+              if (exists) return prev;
+
               return {
                 ...prev,
                 mine: [...(prev.mine || []), status],
               };
-            }
+            },
           );
         } else {
           console.log(ack);
         }
-      }
+      },
     );
 
     setSelectedFile(null);
@@ -128,12 +134,16 @@ const Status = () => {
           }) => {
             // Check if it's my status
             if (payload.owner === user?._id) {
-              const status = {
+              const status: StatusType = {
                 _id: payload.id,
                 userId: payload.owner,
-                publicId: payload.media.publicId,
-                url: payload.media.url,
-                resourceType: payload.media.resource_type,
+                publicId:
+                  payload.media?.publicId || (payload as any).publicId || "",
+                url: payload.media?.url || (payload as any).url || "",
+                resourceType:
+                  payload.media?.resource_type ||
+                  (payload as any).resourceType ||
+                  "image",
                 caption: payload.caption,
                 viewers: [],
                 expiresAt: payload.expiresAt,
@@ -142,16 +152,26 @@ const Status = () => {
               };
               return {
                 ...prev,
-                mine: [...(prev.mine || []), status],
+                mine: (prev.mine || []).some((s) => s._id === status._id)
+                  ? prev.mine
+                  : [...(prev.mine || []), status],
               };
             }
+
+            // PREVENT OWN STATUS FROM SHOWING IN VISIBLE/RECENT UPDATES
+            if (payload.owner === user?._id) return prev;
+
             // Check if it's visible (friend's status)=
-            const newStatus = {
+            const newStatus: StatusType = {
               _id: payload.id,
               userId: payload.owner,
-              publicId: payload.media.publicId,
-              url: payload.media.url,
-              resourceType: payload.media.resource_type,
+              publicId:
+                payload.media?.publicId || (payload as any).publicId || "",
+              url: payload.media?.url || (payload as any).url || "",
+              resourceType:
+                payload.media?.resource_type ||
+                (payload as any).resourceType ||
+                "image",
               caption: payload.caption,
               viewers: [],
               expiresAt: payload.expiresAt,
@@ -160,7 +180,7 @@ const Status = () => {
             };
 
             const existingIndex = (prev.visible || []).findIndex(
-              (s) => s._id === payload.owner
+              (s) => s._id === payload.owner,
             );
 
             let newVisible = [...(prev.visible || [])];
@@ -170,19 +190,21 @@ const Status = () => {
               newVisible[existingIndex] = {
                 ...existing,
                 latest: newStatus.createdAt,
-                total: existing.total + 1,
-                statuses: [...existing.statuses, newStatus],
+                total: (existing.total || 0) + 1,
+                statuses: [...(existing.statuses || []), newStatus],
               };
             } else {
+              const contactMatch = (contactList || []).find(
+                (contact) => contact.contactProfile?._id === payload.owner,
+              );
               newVisible = [
                 {
                   _id: payload.owner,
-                  displayName: contactList.find(
-                    (contact) => contact.contactProfile._id === payload.owner
-                  )?.localName,
-                  profilePic: contactList.find(
-                    (contact) => contact.contactProfile._id === payload.owner
-                  )?.contactProfile?.profilePic,
+                  displayName:
+                    contactMatch?.localName ||
+                    contactMatch?.contactProfile?.displayName ||
+                    "Unknown User",
+                  profilePic: contactMatch?.contactProfile?.profilePic || "",
                   latest: newStatus.createdAt,
                   total: 1,
                   statuses: [newStatus],
@@ -195,9 +217,9 @@ const Status = () => {
               ...prev,
               visible: newVisible,
             };
-          }
+          },
         );
-      }
+      },
     );
 
     return off;
@@ -230,7 +252,8 @@ const Status = () => {
               <label
                 htmlFor="status-camera-header"
                 className="cursor-pointer p-2 rounded-full hover:bg-foreground hover:text-background transition-colors"
-                title="Add status">
+                title="Add status"
+              >
                 <LucideCamera size={20} />
                 <input
                   type="file"
@@ -250,7 +273,8 @@ const Status = () => {
             {/* My Status Row */}
             <div
               className="flex items-center gap-4 p-2 rounded-lg hover:bg-background/20 cursor-pointer -mx-2 transition-colors group"
-              onClick={() => myLastStatus && setViewingStatus(status.mine)}>
+              onClick={() => myLastStatus && setViewingStatus(status.mine)}
+            >
               <StatusRing
                 count={status.mine.length}
                 viewed={false}
@@ -282,7 +306,7 @@ const Status = () => {
                 ) : (
                   status.visible?.map((s) => {
                     const contact = (contactList || []).find(
-                      (c) => c.contactProfile._id === s._id
+                      (c) => c.contactProfile._id === s._id,
                     );
                     const displayName =
                       contact?.localName ||
@@ -296,7 +320,8 @@ const Status = () => {
                       <div
                         key={s._id}
                         className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-50 cursor-pointer -mx-2 transition-colors"
-                        onClick={() => setViewingStatus(s.statuses)}>
+                        onClick={() => setViewingStatus(s.statuses)}
+                      >
                         <StatusRing
                           count={s.statuses.length}
                           displayName={displayName}

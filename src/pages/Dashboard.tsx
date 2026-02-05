@@ -4,22 +4,16 @@ import ChatUI from "../components/ChatUI";
 import { useUserContext } from "@/contexts/UserContext";
 import { useConversationContext } from "@/contexts/ConversationContext";
 import Sidebar from "@/components/Sidebar";
-import MediaPermissionUI from "@/components/MediaPermissionUI";
-import IncomingCallDialog from "@/components/IncomingCallDialog";
-import { Toaster } from "sonner";
-import CallScreen from "@/components/CallScreen";
 import { useNavigation } from "@/contexts/NavigationContext";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import BottomBar from "@/components/BottomBar";
 import ChatJoyride from "@/components/ChatJoyride";
 
 export default function Dashboard() {
-  const { chatAreaRef, setIsAreaClicked, mediaOnboarded } = useUserContext();
+  const { chatAreaRef, setIsAreaClicked } = useUserContext();
   const { setSelectedImage } = useConversationContext();
   const { current } = useNavigation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [mediaDialogOpen, setMediaDialogOpen] =
-    useState<boolean>(!mediaOnboarded);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -27,20 +21,9 @@ export default function Dashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    // keep dialog open state in sync with onboarding flag
-    setMediaDialogOpen(!mediaOnboarded);
-  }, [mediaOnboarded]);
-
   return (
-    <Fragment>
+    <>
       <ChatJoyride />
-      <Toaster position="bottom-right" />
-      {/* Permission dialog */}
-      <MediaPermissionUI open={mediaDialogOpen} setOpen={setMediaDialogOpen} />
-
-      <IncomingCallDialog />
-      <CallScreen />
 
       <div className="flex h-screen">
         {isMobile ? (
@@ -90,6 +73,6 @@ export default function Dashboard() {
           </>
         )}
       </div>
-    </Fragment>
+    </>
   );
 }

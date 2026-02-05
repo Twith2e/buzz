@@ -70,27 +70,31 @@ export default function CallScreen() {
         ) : (
           <div className="flex flex-col items-center gap-4">
             <div className="h-32 w-32 rounded-full flex items-center justify-center">
-              {contactList.find((contact) => contact.email === peerId) ? (
-                <img
-                  className="h-full w-full rounded-full"
-                  src={
-                    contactList.find((contact) => contact.email === peerId)
-                      .contactProfile.profilePic
-                  }
-                  alt={
-                    contactList.find((contact) => contact.email === peerId)
-                      .contactProfile.displayName
-                  }
-                />
-              ) : (
-                <LucideUser className="h-full w-full rounded-full border" />
-              )}
+              {(() => {
+                const contact = contactList.find(
+                  (c) => c.email === peerId || c.contactProfile?._id === peerId,
+                );
+                if (contact?.contactProfile?.profilePic) {
+                  return (
+                    <img
+                      className="h-full w-full rounded-full"
+                      src={contact.contactProfile.profilePic}
+                      alt={contact.contactProfile.displayName}
+                    />
+                  );
+                }
+                return (
+                  <LucideUser className="h-full w-full rounded-full border p-4 text-gray-400" />
+                );
+              })()}
             </div>
             <div className="flex items-center justify-center text-3xl font-semibold">
-              {contactList.find((contact) => contact.email === peerId)
-                ? contactList.find((contact) => contact.email === peerId)
-                    .localName
-                : peerId}
+              {(() => {
+                const contact = contactList.find(
+                  (c) => c.email === peerId || c.contactProfile?._id === peerId,
+                );
+                return contact?.localName || peerId;
+              })()}
             </div>
             <div className="text-xl">
               {callState === "connected" ? "Connected" : "Calling..."}
@@ -128,7 +132,8 @@ export default function CallScreen() {
           variant="ghost"
           size="icon"
           className="rounded-full hover:bg-gray-700 text-white"
-          onClick={localVideoRef.current?.muted ? muteMic : unmuteMic}>
+          onClick={localVideoRef.current?.muted ? muteMic : unmuteMic}
+        >
           {localVideoRef.current?.muted ? (
             <MicOff className="h-6 w-6" />
           ) : (
@@ -140,7 +145,8 @@ export default function CallScreen() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full hover:bg-gray-700 text-white">
+            className="rounded-full hover:bg-gray-700 text-white"
+          >
             <Video className="h-6 w-6" />
           </Button>
         )}
@@ -149,7 +155,8 @@ export default function CallScreen() {
           variant="destructive"
           size="icon"
           className="w-14 h-14 rounded-full"
-          onClick={endCall}>
+          onClick={endCall}
+        >
           <PhoneOff className="h-6 w-6" />
         </Button>
       </div>

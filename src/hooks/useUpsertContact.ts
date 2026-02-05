@@ -24,7 +24,11 @@ async function upsertContactApi(payload: UpsertPayload): Promise<Contact> {
 }
 
 export function useUpsertContact() {
-  const { conversationTitle, setConversationTitle } = useConversationContext();
+  const {
+    conversationTitle,
+    setConversationTitle,
+    email: activeChatEmail,
+  } = useConversationContext();
 
   const queryClient = useQueryClient();
 
@@ -36,9 +40,11 @@ export function useUpsertContact() {
       const previousContacts = queryClient.getQueryData<Contact[]>(["contact"]);
 
       if (
-        conversationTitle &&
-        conversationTitle.toLowerCase() === payload.email.toLowerCase() &&
-        payload.firstName
+        payload.firstName &&
+        ((conversationTitle &&
+          conversationTitle.toLowerCase() === payload.email.toLowerCase()) ||
+          (activeChatEmail &&
+            activeChatEmail.toLowerCase() === payload.email.toLowerCase()))
       ) {
         setConversationTitle(payload.firstName);
       }
@@ -51,7 +57,7 @@ export function useUpsertContact() {
           return old.map((c) =>
             c.email === payload.email
               ? { ...c, localName: payload.firstName ?? c.localName }
-              : c
+              : c,
           );
         }
         // If not found, leave old list as is; server will provide new contact
@@ -75,7 +81,7 @@ export function useUpsertContact() {
         const found = old.find((c) => c.email === serverContact.email);
         if (found) {
           return old.map((c) =>
-            c.email === serverContact.email ? serverContact : c
+            c.email === serverContact.email ? serverContact : c,
           );
         } else {
           return [...old, serverContact];
